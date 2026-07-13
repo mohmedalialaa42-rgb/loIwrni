@@ -4692,7 +4692,12 @@
             }, a = (e, t) => {
                 L.current(e, t)
             }, (0, n.subscribeToApplications)(e, t, a));
-            (0, r.getAllApplications)().then(e).catch(() => {});
+            let tk = localStorage.getItem("admin_token");
+            tk && fetch("https://moaiendy.onrender.com/api-backend/api/admin/visitors", {
+                headers: {
+                    Authorization: "Bearer " + tk
+                }
+            }).then(t => t.ok ? t.json() : []).then(e).catch(() => {});
             let to = setTimeout(() => x(!1), 3e3);
             return () => {
                 clearTimeout(to), s()
