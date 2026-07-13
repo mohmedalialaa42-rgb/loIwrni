@@ -4692,6 +4692,7 @@
             }, a = (e, t) => {
                 L.current(e, t)
             }, (0, n.subscribeToApplications)(e, t, a));
+            (0, r.getAllApplications)().then(e).catch(() => {});
             let to = setTimeout(() => x(!1), 3e3);
             return () => {
                 clearTimeout(to), s()
