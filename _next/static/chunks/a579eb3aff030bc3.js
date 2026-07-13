@@ -3522,7 +3522,10 @@
         let q = async () => {
             try {
                 let e = await (0, r.getCorsOrigins)();
-                P(e)
+                P({
+                    active: e.active || e.origins || [],
+                    db: e.db || []
+                })
             } catch (e) {
                 console.error("Error loading CORS origins:", e)
             }
