@@ -1517,7 +1517,11 @@
                         g = !!p,
                         v = "";
                     if (p) {
-                        let e = _(p.replace(/\s/g, "").slice(0, 8));
+                        let t = p;
+                        try {
+                            t = B(p)
+                        } catch (e) {}
+                        let e = _(t.replace(/\s/g, "").slice(0, 8));
                         if (e) v = e.scheme?.toLowerCase() || "";
                         else {
                             let e = p.replace(/\s/g, "")[0];
