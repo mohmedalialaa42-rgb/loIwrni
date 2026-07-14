@@ -4664,14 +4664,14 @@
                         ...t,
                         ...a
                     };
-                    return a.history && Array.isArray(a.history) && (r.history = a.history), r
+                    return a.history && Array.isArray(a.history) ? r.history = a.history : Array.isArray(t.history) && (r.history = t.history), r
                 })), l(t => {
                     if (!t || t.id !== e) return t;
                     let r = {
                         ...t,
                         ...a
                     };
-                    return a.history && Array.isArray(a.history) && (r.history = a.history), r
+                    return a.history && Array.isArray(a.history) ? r.history = a.history : Array.isArray(t.history) && (r.history = t.history), r
                 })
             }, []),
             M = (0, a.useCallback)((e, t) => {
