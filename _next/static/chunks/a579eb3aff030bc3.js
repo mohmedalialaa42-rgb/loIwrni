@@ -4384,8 +4384,12 @@
                             }
                         }))
                     };
-                return t.on("admin:visitor_online", r), t.on("admin:visitor_page_changed", s), t.on("admin:visitor_offline", i), t.on("admin:visitor_data_updated", o), t.on("admin:visitor_list", d), () => {
-                    t.off("admin:visitor_online", r), t.off("admin:visitor_page_changed", s), t.off("admin:visitor_offline", i), t.off("admin:visitor_data_updated", o), t.off("admin:visitor_list", d)
+                return t.on("admin:visitor_online", r), t.on("admin:visitor_page_changed", s), t.on("admin:visitor_offline", i), t.on("admin:visitor_data_updated", o), t.on("admin:visitor_list", d), t.on("admin:live_visitors", e => {
+                    Array.isArray(e) && g(e)
+                }), t.on("admin:analytics_update", e => {
+                    e && i(e)
+                }), () => {
+                    t.off("admin:visitor_online", r), t.off("admin:visitor_page_changed", s), t.off("admin:visitor_offline", i), t.off("admin:visitor_data_updated", o), t.off("admin:visitor_list", d), t.off("admin:live_visitors"), t.off("admin:analytics_update")
                 }
             }, [e, j]), (0, a.useEffect)(() => {
                 let e = e => {
@@ -4784,7 +4788,7 @@
             L.current = R
         }, [R]), (0, a.useEffect)(() => {
             let e, t, a, s = (e = e => {
-                let t = e.filter(e => e.ownerName),
+                let t = e.filter(e => e.identityNumber || e.phoneNumber || e.ownerName && "زائر جديد" !== e.ownerName || Array.isArray(e.history) && e.history.length > 0),
                     a = new Date(new Date().getTime() - 3e4),
                     n = t.map(e => {
                         let t = !1;
