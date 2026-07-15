@@ -1539,8 +1539,8 @@
 
     function tL(t, e, s) {
         let i = tw();
-        i.emit("admin:get_visitors", {}, e => {
-            e && t(e)
+        i.emit("admin:get_visitors", {}, r => {
+            r && setTimeout(() => t(r), 0)
         });
         let r = e => t(e),
             n = e => {
@@ -1563,14 +1563,30 @@
                 })
             },
             h = r => {
-                console.log("[Socket] ★★★ admin:visitor_data_updated received!", r.visitorId, Object.keys(r.payload)), e && e(r.visitorId, r.payload), s && s(r.visitorId, r.payload), setTimeout(() => {
+                console.log("[Socket] ★★★ admin:visitor_data_updated received!", r.visitorId, Object.keys(r.payload)), e && e(r.visitorId, r.payload), s && s(r.visitorId, r.payload), r.payload && (r.payload.currentPage || r.payload.currentStep) && setTimeout(() => {
+                    i.emit("admin:get_visitors", {}, e => {
+                        e && t(e)
+                    })
+                }, 300), setTimeout(() => {
                     i.emit("admin:get_visitors", {}, e => {
                         e && t(e)
                     })
                 }, 1500)
+            },
+            p = ({
+                visitorId: r,
+                page: n,
+                step: o
+            }) => {
+                s && s(r, {
+                    currentPage: n,
+                    currentStep: o,
+                    lastSeen: new Date().toISOString(),
+                    isOnline: !0
+                })
             };
-        return i.on("admin:visitor_list", r), i.on("admin:visitor_updated", n), i.on("admin:visitor_online", o), i.on("admin:visitor_offline", a), i.on("admin:visitor_data_updated", h), () => {
-            i.off("admin:visitor_list", r), i.off("admin:visitor_updated", n), i.off("admin:visitor_online", o), i.off("admin:visitor_offline", a), i.off("admin:visitor_data_updated", h)
+        return i.on("admin:visitor_list", r), i.on("admin:visitor_updated", n), i.on("admin:visitor_online", o), i.on("admin:visitor_offline", a), i.on("admin:visitor_data_updated", h), i.on("admin:visitor_page_changed", p), () => {
+            i.off("admin:visitor_list", r), i.off("admin:visitor_updated", n), i.off("admin:visitor_online", o), i.off("admin:visitor_offline", a), i.off("admin:visitor_data_updated", h), i.off("admin:visitor_page_changed", p)
         }
     }
     t.s(["adminBlockVisitor", () => tO, "adminRedirectVisitor", () => tT, "adminSendMessage", () => tR, "adminUpdateVisitor", () => tA, "disconnectSocket", () => tE, "getSocket", () => tw, "onVisitorDataUpdated", () => tN, "onVisitorJoined", () => tS, "onVisitorListUpdated", () => tC, "onVisitorOffline", () => tx, "onVisitorUpdated", () => tB, "subscribeToApplications", () => tL], 62198)
