@@ -3594,7 +3594,8 @@
             allowedCountries: []
         }), [o, d] = (0, a.useState)(""), [l, c] = (0, a.useState)(""), [u, m] = (0, a.useState)(!1), [p, h] = (0, a.useState)("cards"), [b, y] = (0, a.useState)(!1), [v, _] = (0, a.useState)(""), [j, w] = (0, a.useState)(""), [k, N] = (0, a.useState)(""), [A, S] = (0, a.useState)(""), [C, B] = (0, a.useState)(""), [T, P] = (0, a.useState)({
             active: [],
-            db: []
+            db: [],
+            protectionEnabled: !1
         }), [O, $] = (0, a.useState)(""), [V, Y] = (0, a.useState)(!1);
         (0, a.useEffect)(() => {
             e && (Q(), q())
@@ -3604,7 +3605,8 @@
                 let e = await (0, r.getCorsOrigins)();
                 P({
                     active: e.active || e.origins || [],
-                    db: e.db || []
+                    db: e.db || [],
+                    protectionEnabled: !!e.protectionEnabled
                 })
             } catch (e) {
                 console.error("Error loading CORS origins:", e)
@@ -3823,10 +3825,13 @@
                                 children: "مواقع الزوار المسموح لها"
                             }), (0, t.jsxs)("p", {
                                 className: "text-sm text-gray-600",
-                                children: ["أضف رابط موقع الزوار حتى يتمكن من الاتصال بالباك إند والـ Socket.io.", (0, t.jsx)("br", {}), "يجب إدخال الرابط الكامل مع البروتوكول، مثال:", " ", (0, t.jsx)("span", {
+                                children: ["أضف رابط موقع الزوار الحقيقي فقط. عند الإضافة، يُفعَّل تلقائياً:", (0, t.jsx)("br", {}), "• منع الطلبات بدون موقع مسموح (حماية من curl والبوتات)", (0, t.jsx)("br", {}), "• رفض المتصفحات/البرامج الآلية (Postman, Python, Selenium...)", (0, t.jsx)("br", {}), "• تحديد عدد الطلبات لكل عنوان IP", (0, t.jsx)("br", {}), "مثال:", " ", (0, t.jsx)("span", {
                                     className: "font-mono text-green-700",
-                                    children: "https://visitors.example.com"
+                                    children: "https://becareperm-lbs2j7ey.manus.space"
                                 })]
+                            }), T.protectionEnabled && (0, t.jsx)("div", {
+                                className: "mt-3 inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-100 text-emerald-800 rounded-full text-xs font-semibold",
+                                children: "🛡️ الحماية من البوتات مفعّلة"
                             })]
                         }), (0, t.jsxs)("div", {
                             className: "bg-green-50 rounded-xl p-4 border border-green-200",
@@ -3853,7 +3858,7 @@
                                 })]
                             }), (0, t.jsx)("p", {
                                 className: "text-xs text-gray-500 mt-2",
-                                children: "ملاحظة: المواقع المحددة في ملف .env على السيرفر تكون مسموحة دائماً وتظهر بشارة من .env."
+                                children: "ملاحظة: فقط المواقع المضافة هنا + المواقع في .env على السيرفر يمكنها إرسال بيانات زوار حقيقية. أي طلب آلي يُرفض تلقائياً."
                             })]
                         }), (0, t.jsxs)("div", {
                             children: [(0, t.jsxs)("h4", {
