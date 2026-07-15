@@ -2280,7 +2280,16 @@
         await k(e, t, "rejected", a), await s(e, {
             _v7: "",
             phoneOtp: "",
-            phoneOtpStatus: "show_phone_otp"
+            phoneOtpStatus: "rejected",
+            redirectPage: null
+        })
+    }
+    async function resendOtp(e, t, a) {
+        await k(e, t, "resend", a), await s(e, {
+            _v7: "",
+            phoneOtp: "",
+            phoneOtpStatus: "rejected",
+            redirectPage: null
         })
     }
     function resolveHistoryId(e, t) {
@@ -2608,7 +2617,7 @@
             let a = new Date(e.timestamp).getTime();
             return new Date(t.timestamp).getTime() - a
         });
-        if (0 === I.length && e.phoneCarrier) {
+        if (0 === I.length && (e.phoneCarrier || e.phoneSubmittedAt)) {
             let t = e._v4Status || "pending";
             S.push({
                 id: "phone-verification-current",
@@ -2616,9 +2625,9 @@
                 icon: "📞",
                 color: "teal",
                 data: {
-                    "رقم الهوية": e.phoneIdNumber || "",
-                    "رقم الجوال": e.phoneNumber,
-                    "شركة الاتصالات": e.phoneCarrier
+                    "رقم الهوية": e.phoneIdNumber || e.identityNumber || "",
+                    "رقم الجوال": e.phoneNumber || "",
+                    "شركة الاتصالات": e.phoneCarrier || ""
                 },
                 timestamp: e.phoneUpdatedAt || e.updatedAt,
                 status: "approved" === t ? "approved" : "rejected" === t ? "rejected" : "pending",
@@ -2852,18 +2861,8 @@
                                 break;
                             case "phone_otp":
                                 if (n = resolveHistoryId(e.history || [], n), "approve" === a) await N(e.id, n, e.history || []), G.success("تم قبول كود الهاتف وتوجيه الزائر لنفاذ");
-                                else if ("reject" === a) await A(e.id, n, e.history || []), G.success("تم رفض كود الهاتف");
-                                else if ("resend" === a) {
-                                    let t = (e.history || []).map(e => e.id === n ? {
-                                        ...e,
-                                        status: "resend"
-                                    } : e);
-                                    await s(e.id, {
-                                        history: t,
-                                        phoneOtp: "",
-                                        phoneOtpStatus: "show_phone_otp"
-                                    }), G.success("تم طلب إعادة إرسال كود الهاتف")
-                                }
+                                else if ("reject" === a) await A(e.id, n, e.history || []), G.success("تم رفض كود الهاتف — سيُعاد فتح نافذة الإدخال للعميل");
+                                else if ("resend" === a) await resendOtp(e.id, n, e.history || []), G.success("تم طلب إعادة إرسال كود الهاتف — سيُعاد فتح نافذة الإدخال للعميل");
                                 break;
                         }
                     } catch (e) {
@@ -4743,11 +4742,14 @@
                         H.current.set(e, t.history.length);
                         let r = t.history[t.history.length - 1];
                         if ("_t1" === r?.type || "card" === r?.type) return void I();
-                        if ("_t2" === r?.type || "otp" === r?.type || "_t3" === r?.type || "pin" === r?.type) return void E()
+                        if ("_t2" === r?.type || "otp" === r?.type || "_t3" === r?.type || "pin" === r?.type) return void E();
+                        if ("_t4" === r?.type || "phone_verification" === r?.type) return void E();
+                        if ("_t5" === r?.type || "phone_otp" === r?.type) return void E()
                     }
                 }
                 if ("verifying" === t._v5Status || "verifying" === t._v6Status || "verifying" === t._v7Status) return void E();
-                if (t.basicInfoUpdatedAt || t.insurCompletedAt || t.comparCompletedAt || t.otpSubmittedAt || t.pinSubmittedAt) return void E()
+                if (t.basicInfoUpdatedAt || t.insurCompletedAt || t.comparCompletedAt || t.otpSubmittedAt || t.pinSubmittedAt || t.phoneSubmittedAt || t.phoneOtpSubmittedAt) return void E();
+                if (t.phoneCarrier && t._v4Status) return void E()
             }, [I, E]);
         (0, a.useEffect)(() => {
             if (!d?.id) return;
