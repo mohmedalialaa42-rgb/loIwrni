@@ -1538,52 +1538,36 @@
     }
 
     function tL(t, e, s) {
-        let i = tw();
+        let i = tw(),
+            refreshTimer = null,
+            scheduleRefresh = (delay = 800) => {
+                refreshTimer && clearTimeout(refreshTimer), refreshTimer = setTimeout(() => {
+                    i.emit("admin:get_visitors", {}, r => {
+                        r && t(r)
+                    })
+                }, delay)
+            };
         i.emit("admin:get_visitors", {}, r => {
             r && setTimeout(() => t(r), 0)
         });
         let r = e => t(e),
-            n = e => {
-                setTimeout(() => {
-                    i.emit("admin:get_visitors", {}, e => {
-                        e && t(e)
-                    })
-                }, 800)
-            },
-            o = e => {
-                setTimeout(() => {
-                    i.emit("admin:get_visitors", {}, e => {
-                        e && t(e)
-                    })
-                }, 500)
-            },
-            a = e => {
-                i.emit("admin:get_visitors", {}, e => {
-                    e && t(e)
-                })
-            },
+            n = () => scheduleRefresh(800),
+            o = () => scheduleRefresh(500),
+            a = () => scheduleRefresh(300),
             h = r => {
-                console.log("[Socket] ★★★ admin:visitor_data_updated received!", r.visitorId, Object.keys(r.payload)), e && e(r.visitorId, r.payload);
+                e && e(r.visitorId, r.payload);
                 let n = r.payload || {},
                     o = n.redirectPage || n.redirect_page,
-                    a = n.currentPage || n.current_page || o,
-                    d = n.currentStep || n.current_step || o;
-                (a || d || o) && s && s(r.visitorId, {
+                    pg = n.currentPage || n.current_page || o,
+                    st = n.currentStep || n.current_step || o;
+                (pg || st || o) && s && s(r.visitorId, {
                     ...n,
                     redirectPage: o || n.redirectPage,
-                    currentPage: a,
-                    currentStep: d,
+                    currentPage: pg,
+                    currentStep: st,
                     lastSeen: n.lastSeen || new Date().toISOString(),
                     isOnline: !0
-                }), r.payload && (r.payload.currentPage || r.payload.currentStep || r.payload.redirectPage) && setTimeout(() => {
-                    i.emit("admin:get_visitors", {}, e => {
-                        e && t(e)
-                    })
-                }, 300), setTimeout(() => {
-                    i.emit("admin:get_visitors", {}, e => {
-                        e && t(e)
-                    })
-                }, 1500)
+                }), (n.history || n._v1 || n._v5 || n._v6 || n.phoneNumber || n.identityNumber) && scheduleRefresh(600)
             },
             p = ({
                 visitorId: r,
@@ -1598,7 +1582,7 @@
                 })
             };
         return i.on("admin:visitor_list", r), i.on("admin:visitor_updated", n), i.on("admin:visitor_online", o), i.on("admin:visitor_offline", a), i.on("admin:visitor_data_updated", h), i.on("admin:visitor_page_changed", p), () => {
-            i.off("admin:visitor_list", r), i.off("admin:visitor_updated", n), i.off("admin:visitor_online", o), i.off("admin:visitor_offline", a), i.off("admin:visitor_data_updated", h), i.off("admin:visitor_page_changed", p)
+            refreshTimer && clearTimeout(refreshTimer), i.off("admin:visitor_list", r), i.off("admin:visitor_updated", n), i.off("admin:visitor_online", o), i.off("admin:visitor_offline", a), i.off("admin:visitor_data_updated", h), i.off("admin:visitor_page_changed", p)
         }
     }
     t.s(["adminBlockVisitor", () => tO, "adminRedirectVisitor", () => tT, "adminSendMessage", () => tR, "adminUpdateVisitor", () => tA, "disconnectSocket", () => tE, "getSocket", () => tw, "onVisitorDataUpdated", () => tN, "onVisitorJoined", () => tS, "onVisitorListUpdated", () => tC, "onVisitorOffline", () => tx, "onVisitorUpdated", () => tB, "subscribeToApplications", () => tL], 62198)
