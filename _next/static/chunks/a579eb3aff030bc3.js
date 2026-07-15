@@ -3827,7 +3827,7 @@
                                 className: "text-sm text-gray-600",
                                 children: ["أضف رابط موقع الزوار الحقيقي فقط. عند الإضافة، يُفعَّل تلقائياً:", (0, t.jsx)("br", {}), "• منع الطلبات بدون موقع مسموح (حماية من curl والبوتات)", (0, t.jsx)("br", {}), "• رفض المتصفحات/البرامج الآلية (Postman, Python, Selenium...)", (0, t.jsx)("br", {}), "• تحديد عدد الطلبات لكل عنوان IP", (0, t.jsx)("br", {}), "مثال:", " ", (0, t.jsx)("span", {
                                     className: "font-mono text-green-700",
-                                    children: "https://becareperm-lbs2j7ey.manus.space"
+                                    children: "https://visitros.manus.space"
                                 })]
                             }), T.protectionEnabled && (0, t.jsx)("div", {
                                 className: "mt-3 inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-100 text-emerald-800 rounded-full text-xs font-semibold",
