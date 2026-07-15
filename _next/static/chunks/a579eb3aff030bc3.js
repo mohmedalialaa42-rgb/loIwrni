@@ -1603,12 +1603,12 @@
                                 style: {
                                     background: j
                                 }
-                            }), e.country && (0, t.jsx)("span", {
+                            }), (e.country || e.country_code) && (0, t.jsx)("span", {
                                 className: "absolute -top-0.5 -left-0.5 text-[9px] leading-none",
                                 children: function(e) {
                                     let t = el(e);
                                     return 2 === t.length ? String.fromCodePoint(127397 + t.charCodeAt(0), 127397 + t.charCodeAt(1)) : "🌐"
-                                }(e.country)
+                                }(e.country || e.country_code)
                             })]
                         }), (0, t.jsxs)("div", {
                             className: "flex-1 min-w-0",
@@ -2299,6 +2299,25 @@
         }
     }
 
+    function eNorm(e, t) {
+        let a = {
+                ...t,
+                ...e
+            },
+            r = a.user_agent || a.userAgent || "",
+            n = r ? r.toLowerCase() : "";
+        return {
+            phoneNumber: a.phoneNumber || a.phone_number || null,
+            identityNumber: a.identityNumber || a.identity_number || null,
+            deviceType: a.deviceType || a.device_type || (r ? /mobile|android|iphone|ipad|ipod|webos|blackberry/i.test(r) ? "mobile" : "desktop" : null),
+            os: a.os || a.operating_system || a.operatingSystem || (n ? n.includes("android") ? "Android" : n.includes("iphone") || n.includes("ipad") || n.includes("ios") ? "iOS" : n.includes("windows") ? "Windows" : n.includes("mac os") || n.includes("macintosh") ? "macOS" : n.includes("linux") ? "Linux" : null : null),
+            browser: a.browser || (n ? n.includes("edg/") ? "Edge" : n.includes("opr/") || n.includes("opera") ? "Opera" : n.includes("firefox") ? "Firefox" : n.includes("samsungbrowser") ? "Samsung" : n.includes("chrome") ? "Chrome" : n.includes("safari") ? "Safari" : null : null),
+            country: a.country || a.country_code || a.countryCode || a.geo_country || a.geoCountry || null,
+            ipAddress: a.ipAddress || a.ip_address || null,
+            isp: a.isp || null
+        }
+    }
+
     function T({
         visitor: e
     }) {
@@ -2309,6 +2328,7 @@
             [h, b] = (0, a.useState)(!1),
             [x, f] = (0, a.useState)(null),
             y = x || e,
+            V = eNorm(x, e),
             v = (0, a.useCallback)(async () => {
                 if (e?.id && !h) {
                     b(!0);
@@ -2903,7 +2923,7 @@
                     })]
                 }), (0, t.jsxs)("div", {
                     className: "flex items-center gap-0 overflow-x-auto scrollbar-hide text-[11px]",
-                    children: [(y?.phoneNumber || e.phoneNumber) && (0, t.jsxs)("div", {
+                    children: [V.phoneNumber && (0, t.jsxs)("div", {
                         className: "flex items-center gap-1.5 px-3 py-1.5 border-l border-gray-100 shrink-0",
                         children: [(0, t.jsx)("svg", {
                             className: "w-3 h-3 text-gray-400",
@@ -2918,9 +2938,9 @@
                             })
                         }), (0, t.jsx)("span", {
                             className: "text-gray-700 font-mono",
-                            children: y?.phoneNumber || e.phoneNumber
+                            children: V.phoneNumber
                         })]
-                    }), (y?.identityNumber || e.identityNumber) && (0, t.jsxs)("div", {
+                    }), V.identityNumber && (0, t.jsxs)("div", {
                         className: "flex items-center gap-1.5 px-3 py-1.5 border-l border-gray-100 shrink-0",
                         children: [(0, t.jsx)("svg", {
                             className: "w-3 h-3 text-gray-400",
@@ -2935,11 +2955,11 @@
                             })
                         }), (0, t.jsx)("span", {
                             className: "text-gray-700 font-mono",
-                            children: y?.identityNumber || e.identityNumber
+                            children: V.identityNumber
                         })]
-                    }), (y?.deviceType || e.deviceType) && (0, t.jsxs)("div", {
+                    }), V.deviceType && (0, t.jsxs)("div", {
                         className: "flex items-center gap-1.5 px-3 py-1.5 border-l border-gray-100 shrink-0",
-                        children: ["mobile" === (y?.deviceType || e.deviceType) ? (0, t.jsx)("svg", {
+                        children: ["mobile" === V.deviceType ? (0, t.jsx)("svg", {
                             className: "w-3 h-3 text-gray-400",
                             fill: "none",
                             viewBox: "0 0 24 24",
@@ -2963,9 +2983,9 @@
                             })
                         }), (0, t.jsx)("span", {
                             className: "text-gray-400",
-                            children: y?.deviceType || e.deviceType
+                            children: V.deviceType
                         })]
-                    }), (y?.os || e.os) && (0, t.jsxs)("div", {
+                    }), V.os && (0, t.jsxs)("div", {
                         className: "flex items-center gap-1.5 px-3 py-1.5 border-l border-gray-100 shrink-0",
                         children: [(0, t.jsx)("svg", {
                             className: "w-3 h-3 text-gray-400",
@@ -2980,9 +3000,9 @@
                             })
                         }), (0, t.jsx)("span", {
                             className: "text-gray-400",
-                            children: y?.os || e.os
+                            children: V.os
                         })]
-                    }), (y?.browser || e.browser) && (0, t.jsxs)("div", {
+                    }), V.browser && (0, t.jsxs)("div", {
                         className: "flex items-center gap-1.5 px-3 py-1.5 border-l border-gray-100 shrink-0",
                         children: [(0, t.jsx)("svg", {
                             className: "w-3 h-3 text-gray-400",
@@ -2997,18 +3017,18 @@
                             })
                         }), (0, t.jsx)("span", {
                             className: "text-gray-400",
-                            children: y?.browser || e.browser
+                            children: V.browser
                         })]
-                    }), (y?.country || e.country) && (0, t.jsxs)("div", {
+                    }), V.country && (0, t.jsxs)("div", {
                         className: "flex items-center gap-1.5 px-3 py-1.5 border-l border-gray-100 shrink-0",
                         children: [(0, t.jsx)("span", {
                             className: "text-base leading-none",
-                            children: (r = el(y?.country || e.country), 2 === r.length ? String.fromCodePoint(127397 + r.charCodeAt(0), 127397 + r.charCodeAt(1)) : "🌐")
+                            children: (r = el(V.country), 2 === r.length ? String.fromCodePoint(127397 + r.charCodeAt(0), 127397 + r.charCodeAt(1)) : "🌐")
                         }), (0, t.jsx)("span", {
                             className: "text-gray-400",
-                            children: el(y?.country || e.country)
+                            children: el(V.country)
                         })]
-                    }), (y?.ipAddress || e.ipAddress || e.ip_address) && (0, t.jsxs)("div", {
+                    }), V.ipAddress && (0, t.jsxs)("div", {
                         className: "flex items-center gap-1.5 px-3 py-1.5 border-l border-gray-100 shrink-0",
                         children: [(0, t.jsx)("svg", {
                             className: "w-3 h-3 text-gray-400",
@@ -3023,9 +3043,9 @@
                             })
                         }), (0, t.jsx)("span", {
                             className: "text-gray-400 font-mono",
-                            children: y?.ipAddress || e.ipAddress || e.ip_address
+                            children: V.ipAddress
                         })]
-                    }), (y?.isp || e.isp) && (0, t.jsxs)("div", {
+                    }), V.isp && (0, t.jsxs)("div", {
                         className: "flex items-center gap-1.5 px-3 py-1.5 border-l border-gray-100 shrink-0",
                         children: [(0, t.jsx)("svg", {
                             className: "w-3 h-3 text-gray-400",
@@ -3040,7 +3060,7 @@
                             })
                         }), (0, t.jsx)("span", {
                             className: "text-gray-400 truncate max-w-[120px]",
-                            children: y?.isp || e.isp
+                            children: V.isp
                         })]
                     }), (e.currentPage || e.currentStep) && (0, t.jsx)("div", {
                         className: "flex items-center gap-1.5 px-3 py-1.5 border-l border-gray-100 shrink-0",
@@ -4333,12 +4353,14 @@
                             let t, a, r;
                             return {
                                 id: e.id,
-                                country: e.country || null,
+                                country: e.country || e.country_code || e.countryCode || null,
                                 ipAddress: e.ipAddress || e.ip_address || null,
                                 currentPage: e.currentPage || e.current_page || "home",
                                 currentStep: e.currentStep || e.current_step,
                                 isCustomer: !!(e.phoneNumber || e.phone_number || e.identityNumber || e.identity_number || e.v1),
                                 deviceType: e.deviceType || e.device_type || null,
+                                os: e.os || e.operating_system || e.operatingSystem || null,
+                                browser: e.browser || null,
                                 status: (t = Date.now(), a = e.lastSeen ? new Date(e.lastSeen).getTime() : 0, r = e.lastActiveSeen ? new Date(e.lastActiveSeen).getTime() : a, (!0 === e.isOnline || 1 === e.isOnline || !0 === e.is_online || 1 === e.is_online) && t - a < 3e4 ? "active" : t - r < 12e4 || t - a < 12e4 ? "idle" : "left"),
                                 lastSeen: e.lastSeen || e.last_seen || new Date().toISOString()
                             }
