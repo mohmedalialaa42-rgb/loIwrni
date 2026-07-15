@@ -2281,6 +2281,7 @@
             _v7: "",
             phoneOtp: "",
             phoneOtpStatus: "rejected",
+            phoneOtpRejectionError: "رمز غير صحيح - يرجى إدخال رمز تحقق جديد",
             redirectPage: null
         })
     }
@@ -2289,6 +2290,7 @@
             _v7: "",
             phoneOtp: "",
             phoneOtpStatus: "rejected",
+            phoneOtpRejectionError: "يرجى إدخال رمز تحقق جديد",
             redirectPage: null
         })
     }
