@@ -4814,7 +4814,19 @@
                 z.current(e, t)
             }, a = (e, t) => {
                 L.current(e, t)
-            }, (0, n.subscribeToApplications)(e, t, a));
+            }, p = ({
+                visitorId: e,
+                page: t,
+                step: a
+            }) => {
+                L.current(e, {
+                    currentPage: t,
+                    currentStep: a,
+                    lastSeen: new Date().toISOString(),
+                    isOnline: !0
+                })
+            }, s = (0, n.subscribeToApplications)(e, t, a), i = (0, n.getSocket)();
+            i.on("admin:visitor_page_changed", p);
             let tk = localStorage.getItem("admin_token");
             tk && fetch("https://moaiendy.onrender.com/api-backend/api/admin/visitors", {
                 headers: {
@@ -4823,7 +4835,7 @@
             }).then(t => t.ok ? t.json() : []).then(e).catch(() => {});
             let to = setTimeout(() => x(!1), 3e3);
             return () => {
-                clearTimeout(to), s()
+                clearTimeout(to), i.off("admin:visitor_page_changed", p), s()
             }
         }, []);
         let O = (0, a.useMemo)(() => {
