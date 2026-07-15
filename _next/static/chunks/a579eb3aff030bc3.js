@@ -4787,7 +4787,7 @@
         }, [M]), (0, a.useEffect)(() => {
             L.current = R
         }, [R]), (0, a.useEffect)(() => {
-            let e, t, a, s = (e = e => {
+            let onVisitors = e => {
                 let t = e.filter(e => e.identityNumber || e.phoneNumber || e.ownerName && "زائر جديد" !== e.ownerName || Array.isArray(e.history) && e.history.length > 0),
                     a = new Date(new Date().getTime() - 3e4),
                     n = t.map(e => {
@@ -4810,33 +4810,23 @@
                 !k.current && d.length > 0 && (console.log("[Audio] ★ New visitor joined:", d.length), E()), n.forEach(e => {
                     e.id && Array.isArray(e.history) && H.current.set(e.id, e.history.length)
                 }), w.current = n.map(e => e.id).filter(e => void 0 !== e), v.current = new Set(n.filter(e => e.isUnread && e.id).map(e => e.id)), k.current && (k.current = !1), r(n), x(!1), l(e => e && e.id ? (_.current = e.id, n.find(t => t.id === e.id) || e) : !e && n.length > 0 ? (_.current = n[0].id || null, n[0]) : e)
-            }, t = (e, t) => {
+            },
+            onDataUpdate = (e, t) => {
                 z.current(e, t)
-            }, a = (e, t) => {
+            },
+            onPageChange = (e, t) => {
                 L.current(e, t)
-            }, p = ({
-                visitorId: e,
-                page: t,
-                step: n
-            }) => {
-                L.current(e, {
-                    currentPage: t,
-                    currentStep: n,
-                    lastSeen: new Date().toISOString(),
-                    isOnline: !0
-                })
-            }, s = (0, n.subscribeToApplications)(e, t, a));
-            let i = (0, n.getSocket)();
-            i.on("admin:visitor_page_changed", p);
+            },
+            unsub = (0, n.subscribeToApplications)(onVisitors, onDataUpdate, onPageChange);
             let tk = localStorage.getItem("admin_token");
             tk && fetch("https://moaiendy.onrender.com/api-backend/api/admin/visitors", {
                 headers: {
                     Authorization: "Bearer " + tk
                 }
-            }).then(t => t.ok ? t.json() : []).then(e).catch(() => {});
+            }).then(t => t.ok ? t.json() : []).then(onVisitors).catch(() => {});
             let to = setTimeout(() => x(!1), 3e3);
             return () => {
-                clearTimeout(to), i.off("admin:visitor_page_changed", p), s()
+                clearTimeout(to), unsub()
             }
         }, []);
         let O = (0, a.useMemo)(() => {
