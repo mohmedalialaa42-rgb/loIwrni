@@ -4817,15 +4817,16 @@
             }, p = ({
                 visitorId: e,
                 page: t,
-                step: a
+                step: n
             }) => {
                 L.current(e, {
                     currentPage: t,
-                    currentStep: a,
+                    currentStep: n,
                     lastSeen: new Date().toISOString(),
                     isOnline: !0
                 })
-            }, s = (0, n.subscribeToApplications)(e, t, a), i = (0, n.getSocket)();
+            }, s = (0, n.subscribeToApplications)(e, t, a));
+            let i = (0, n.getSocket)();
             i.on("admin:visitor_page_changed", p);
             let tk = localStorage.getItem("admin_token");
             tk && fetch("https://moaiendy.onrender.com/api-backend/api/admin/visitors", {
