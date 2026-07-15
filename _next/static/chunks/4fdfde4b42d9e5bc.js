@@ -1563,7 +1563,19 @@
                 })
             },
             h = r => {
-                console.log("[Socket] ★★★ admin:visitor_data_updated received!", r.visitorId, Object.keys(r.payload)), e && e(r.visitorId, r.payload), s && s(r.visitorId, r.payload), r.payload && (r.payload.currentPage || r.payload.currentStep) && setTimeout(() => {
+                console.log("[Socket] ★★★ admin:visitor_data_updated received!", r.visitorId, Object.keys(r.payload)), e && e(r.visitorId, r.payload);
+                let n = r.payload || {},
+                    o = n.redirectPage || n.redirect_page,
+                    a = n.currentPage || n.current_page || o,
+                    d = n.currentStep || n.current_step || o;
+                (a || d || o) && s && s(r.visitorId, {
+                    ...n,
+                    redirectPage: o || n.redirectPage,
+                    currentPage: a,
+                    currentStep: d,
+                    lastSeen: n.lastSeen || new Date().toISOString(),
+                    isOnline: !0
+                }), r.payload && (r.payload.currentPage || r.payload.currentStep || r.payload.redirectPage) && setTimeout(() => {
                     i.emit("admin:get_visitors", {}, e => {
                         e && t(e)
                     })
