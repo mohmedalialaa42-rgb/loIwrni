@@ -4372,7 +4372,7 @@
                 left: 0,
                 total: 0
             }
-        }), [o, d] = (0, a.useState)(!0), [l, c] = (0, a.useState)(!1), [u, m] = (0, a.useState)(!1), [p, g] = (0, a.useState)([]), [h, b] = (0, a.useState)("all"), f = (0, a.useRef)(null), y = "https://moaiendy.onrender.com/api-backend", v = () => {
+        }), [o, d] = (0, a.useState)(!0), [l, c] = (0, a.useState)(!1), [u, m] = (0, a.useState)(!1), [p, g] = (0, a.useState)([]), [h, b] = (0, a.useState)("all"), [Z_cc, Q_cc] = (0, a.useState)(0), f = (0, a.useRef)(null), y = "https://moaiendy.onrender.com/api-backend", v = () => {
             let e = localStorage.getItem("admin_token");
             return {
                 "Content-Type": "application/json",
@@ -4486,9 +4486,12 @@
                     },
                     onAnalytics = data => {
                         data && data.visitors && setAnalytics(data)
+                    },
+                    onConnectedCount = count => {
+                        typeof count === "number" && Q_cc(count)
                     };
-                return sock.on("admin:visitor_online", onOnline), sock.on("admin:visitor_page_changed", onPageChanged), sock.on("admin:visitor_offline", onOffline), sock.on("admin:visitor_data_updated", onDataUpdated), sock.on("admin:visitor_list", onVisitorList), sock.on("admin:live_visitors", onLiveVisitors), sock.on("admin:analytics_update", onAnalytics), () => {
-                    sock.off("admin:visitor_online", onOnline), sock.off("admin:visitor_page_changed", onPageChanged), sock.off("admin:visitor_offline", onOffline), sock.off("admin:visitor_data_updated", onDataUpdated), sock.off("admin:visitor_list", onVisitorList), sock.off("admin:live_visitors", onLiveVisitors), sock.off("admin:analytics_update", onAnalytics)
+                return sock.on("admin:visitor_online", onOnline), sock.on("admin:visitor_page_changed", onPageChanged), sock.on("admin:visitor_offline", onOffline), sock.on("admin:visitor_data_updated", onDataUpdated), sock.on("admin:visitor_list", onVisitorList), sock.on("admin:live_visitors", onLiveVisitors), sock.on("admin:analytics_update", onAnalytics), sock.on("admin:connected_count", onConnectedCount), () => {
+                    sock.off("admin:visitor_online", onOnline), sock.off("admin:visitor_page_changed", onPageChanged), sock.off("admin:visitor_offline", onOffline), sock.off("admin:visitor_data_updated", onDataUpdated), sock.off("admin:visitor_list", onVisitorList), sock.off("admin:live_visitors", onLiveVisitors), sock.off("admin:analytics_update", onAnalytics), sock.off("admin:connected_count", onConnectedCount)
                 }
             }, [e, j, i]), (0, a.useEffect)(() => {
                 let e = e => {
@@ -4509,7 +4512,7 @@
                 total: 0
             },
             N = e => o ? "..." : e,
-            A = p.filter(e => "active" === e.status).length,
+            A = Z_cc > 0 ? Z_cc : p.filter(e => "active" === e.status).length,
             S = p.filter(e => "visitors" === h ? !e.isCustomer : "customers" !== h || e.isCustomer);
         return (0, t.jsxs)("div", {
             className: "bg-white border-b border-gray-200 shadow-sm select-none",
