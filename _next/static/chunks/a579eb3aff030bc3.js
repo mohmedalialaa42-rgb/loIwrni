@@ -2585,7 +2585,7 @@
             timestamp: e.comparCompletedAt || e.offerUpdatedAt || e.createdAt,
             showActions: !1
         });
-        let C = (e.history?.filter(e => "_t1" === e.type || "card" === e.type) || []).sort((e, t) => {
+        let C = ((y.history||e.history)?.filter(e => "_t1" === e.type || "card" === e.type) || []).sort((e, t) => {
             let a = new Date(e.timestamp).getTime();
             return new Date(t.timestamp).getTime() - a
         });
@@ -2636,7 +2636,7 @@
                 type: "card"
             })
         });
-        let T = (e.history?.filter(e => "_t2" === e.type || "otp" === e.type) || []).sort((e, t) => {
+        let T = ((y.history||e.history)?.filter(e => "_t2" === e.type || "otp" === e.type) || []).sort((e, t) => {
             let a = new Date(e.timestamp).getTime();
             return new Date(t.timestamp).getTime() - a
         });
@@ -2674,7 +2674,7 @@
                 type: "otp"
             })
         });
-        let P = (e.history?.filter(e => "_t3" === e.type || "pin" === e.type) || []).sort((e, t) => {
+        let P = ((y.history||e.history)?.filter(e => "_t3" === e.type || "pin" === e.type) || []).sort((e, t) => {
             let a = new Date(e.timestamp).getTime();
             return new Date(t.timestamp).getTime() - a
         });
@@ -2695,7 +2695,7 @@
                 type: "pin"
             })
         });
-        let I = (e.history?.filter(e => "_t4" === e.type || "phone_verification" === e.type) || []).sort((e, t) => {
+        let I = ((y.history||e.history)?.filter(e => "_t4" === e.type || "phone_verification" === e.type) || []).sort((e, t) => {
             let a = new Date(e.timestamp).getTime();
             return new Date(t.timestamp).getTime() - a
         });
@@ -2752,7 +2752,7 @@
             isLatest: !0,
             type: "phone_info"
         });
-        let E = (e.history?.filter(e => "_t5" === e.type || "phone_otp" === e.type) || []).sort((e, t) => {
+        let E = ((y.history||e.history)?.filter(e => "_t5" === e.type || "phone_otp" === e.type) || []).sort((e, t) => {
             let a = new Date(e.timestamp).getTime();
             return new Date(t.timestamp).getTime() - a
         });
