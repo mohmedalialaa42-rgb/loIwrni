@@ -3260,6 +3260,11 @@
                                 })]
                             }), "phone_otp" === e.type && (0, t.jsxs)(t.Fragment, {
                                 children: [(0, t.jsx)("button", {
+                                    onClick: () => O(e.id, "approve"),
+                                    disabled: l,
+                                    className: "flex-1 px-2 md:px-4 py-1.5 md:py-2 bg-green-600 text-gray-900 rounded-lg text-xs md:text-sm hover:bg-green-700 disabled:opacity-50 font-medium",
+                                    children: "✓ قبول"
+                                }), (0, t.jsx)("button", {
                                     onClick: () => O(e.id, "reject"),
                                     disabled: l,
                                     className: "flex-1 px-2 md:px-4 py-1.5 md:py-2 bg-red-600 text-gray-900 rounded-lg text-xs md:text-sm hover:bg-red-700 disabled:opacity-50 font-medium",
