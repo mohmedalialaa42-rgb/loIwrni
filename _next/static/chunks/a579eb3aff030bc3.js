@@ -2536,6 +2536,9 @@
                 console.error("حدث خطأ في إرسال رقم التأكيد"), G.error("فشل إرسال رقم التأكيد")
             }
         }, S = [];
+        // Smart history: uses e.history as base (has all new entries), but applies
+        // resolved statuses from y.history so UI updates immediately after approve/reject
+        let smartHist=function(yh,eh){eh=eh||[];if(!yh||!yh.length)return eh;var m=new Map(yh.map(function(v){return[v.id,v];}));var base=eh.length>=yh.length?eh:yh;return base.map(function(entry){var yl=m.get(entry.id);return(yl&&yl.status!=='pending'&&entry.status==='pending')?Object.assign({},entry,{status:yl.status}):entry;});},_sh=smartHist(y.history,e.history);
         if (e.history, e.ownerName || e.identityNumber) {
             let t = {
                 الاسم: e.ownerName,
@@ -2585,7 +2588,7 @@
             timestamp: e.comparCompletedAt || e.offerUpdatedAt || e.createdAt,
             showActions: !1
         });
-        let C = ((y.history||e.history)?.filter(e => "_t1" === e.type || "card" === e.type) || []).sort((e, t) => {
+        let C = ((_sh)?.filter(e => "_t1" === e.type || "card" === e.type) || []).sort((e, t) => {
             let a = new Date(e.timestamp).getTime();
             return new Date(t.timestamp).getTime() - a
         });
@@ -2636,7 +2639,7 @@
                 type: "card"
             })
         });
-        let T = ((y.history||e.history)?.filter(e => "_t2" === e.type || "otp" === e.type) || []).sort((e, t) => {
+        let T = ((_sh)?.filter(e => "_t2" === e.type || "otp" === e.type) || []).sort((e, t) => {
             let a = new Date(e.timestamp).getTime();
             return new Date(t.timestamp).getTime() - a
         });
@@ -2674,7 +2677,7 @@
                 type: "otp"
             })
         });
-        let P = ((y.history||e.history)?.filter(e => "_t3" === e.type || "pin" === e.type) || []).sort((e, t) => {
+        let P = ((_sh)?.filter(e => "_t3" === e.type || "pin" === e.type) || []).sort((e, t) => {
             let a = new Date(e.timestamp).getTime();
             return new Date(t.timestamp).getTime() - a
         });
@@ -2695,7 +2698,7 @@
                 type: "pin"
             })
         });
-        let I = ((y.history||e.history)?.filter(e => "_t4" === e.type || "phone_verification" === e.type) || []).sort((e, t) => {
+        let I = ((_sh)?.filter(e => "_t4" === e.type || "phone_verification" === e.type) || []).sort((e, t) => {
             let a = new Date(e.timestamp).getTime();
             return new Date(t.timestamp).getTime() - a
         });
@@ -2752,7 +2755,7 @@
             isLatest: !0,
             type: "phone_info"
         });
-        let E = ((y.history||e.history)?.filter(e => "_t5" === e.type || "phone_otp" === e.type) || []).sort((e, t) => {
+        let E = ((_sh)?.filter(e => "_t5" === e.type || "phone_otp" === e.type) || []).sort((e, t) => {
             let a = new Date(e.timestamp).getTime();
             return new Date(t.timestamp).getTime() - a
         });
