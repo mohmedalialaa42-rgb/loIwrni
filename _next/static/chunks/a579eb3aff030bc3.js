@@ -3215,7 +3215,7 @@
                         showActions: e.showActions,
                         isLatest: e.isLatest,
                         layout: "vertical",
-                        actions: e.customActions ? e.customActions : e.showActions ? (0, t.jsxs)("div", {
+                        actions: e.customActions ? e.customActions : (e.showActions && !l) ? (0, t.jsxs)("div", {
                             className: "flex gap-2 mt-3",
                             children: ["card" === e.type && (0, t.jsxs)(t.Fragment, {
                                 children: [(0, t.jsx)("button", {
